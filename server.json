@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.tvlss/hirejack-mcp",
+  "description": "Tech job market intelligence: jobs, companies, salaries, skill velocity, hiring trends.",
+  "repository": {
+    "url": "https://github.com/TVLSS/hirejack-mcp",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "websiteUrl": "https://hirejack.com",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@hirejack/mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ],
+  "remotes": [
+    {
+      "url": "https://hirejack.com/api/mcp",
+      "type": "streamable-http"
+    }
+  ]
+}

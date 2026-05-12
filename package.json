@@ -1,0 +1,62 @@
+{
+  "name": "@hirejack/mcp",
+  "version": "0.1.1",
+  "mcpName": "io.github.tvlss/hirejack-mcp",
+  "description": "HireJack MCP server — query tech job market intelligence (jobs, companies, skills, salaries, hiring trends) from Claude Desktop, Claude Code, Cursor, Cline, and other MCP clients",
+  "type": "module",
+  "bin": {
+    "hirejack-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "anthropic",
+    "jobs",
+    "job-search",
+    "career",
+    "salary",
+    "hiring",
+    "tech-jobs",
+    "ai-tools"
+  ],
+  "author": "Bill Barthel <support@tvlss.com> (https://hirejack.com)",
+  "license": "MIT",
+  "homepage": "https://github.com/TVLSS/hirejack-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TVLSS/hirejack-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TVLSS/hirejack-mcp/issues",
+    "email": "support@tvlss.com"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
