@@ -51,8 +51,8 @@ the claude.ai connector regression is resolved (see below).
 
 | Transport | Where | Tools available |
 |-----------|-------|-----------------|
-| **stdio** (this package) | `npx -y @hirejack/mcp` | 4 public tools (`search_jobs`, `get_company_profile`, `search_companies`, `get_market_pulse`). Pro+/Analyst tools surface but require auth — point users at the hosted endpoint. |
-| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 18 tools, including Pro+/Analyst intelligence tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
+| **stdio** (this package) | `npx -y @hirejack/mcp` | 5 public tools (`search_jobs`, `get_job`, `get_company_profile`, `search_companies`, `get_market_pulse`). Pro+/Analyst tools surface but require auth — point users at the hosted endpoint. |
+| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 22 tools, including Pro+/Analyst intelligence tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
 
 ## Tools
 
@@ -131,7 +131,7 @@ src/
 │   ├── api.ts          # HireJack REST client
 │   ├── format.ts       # tool result helpers
 │   └── proAuth.ts      # Pro+ auth check (returns "use hosted endpoint" in stdio)
-└── tools/              # 18 tool implementations
+└── tools/              # 22 tool implementations
 ```
 
 ## License

@@ -4,6 +4,7 @@
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { searchJobsTool } from "./tools/searchJobs.js";
+import { getJobTool } from "./tools/getJob.js";
 import { getCompanyProfileTool } from "./tools/getCompanyProfile.js";
 import { searchCompaniesTool } from "./tools/searchCompanies.js";
 import { getMarketPulseTool } from "./tools/getMarketPulse.js";
@@ -12,6 +13,9 @@ import { companyFitTool } from "./tools/companyFit.js";
 import { recommendationsTool } from "./tools/recommendations.js";
 import { salaryBenchmarkTool } from "./tools/salaryBenchmark.js";
 import { skillGapTool } from "./tools/skillGap.js";
+import { marketPositionTool } from "./tools/marketPosition.js";
+import { skillImpactTool } from "./tools/skillImpact.js";
+import { watchlistIntelligenceTool } from "./tools/watchlistIntelligence.js";
 import { resumeRewriteTool } from "./tools/resumeRewrite.js";
 import { interviewPrepTool } from "./tools/interviewPrep.js";
 import { getCompanyHistoryTool } from "./tools/getCompanyHistory.js";
@@ -58,6 +62,7 @@ export type Tool = {
 export const TOOLS: Tool[] = [
   // Public — no auth required
   searchJobsTool,
+  getJobTool,
   getCompanyProfileTool,
   searchCompaniesTool,
   getMarketPulseTool,
@@ -67,6 +72,9 @@ export const TOOLS: Tool[] = [
   recommendationsTool,
   salaryBenchmarkTool,
   skillGapTool,
+  marketPositionTool,
+  skillImpactTool,
+  watchlistIntelligenceTool,
   // Premium — also require Premium tier (gated server-side)
   resumeRewriteTool,
   interviewPrepTool,
