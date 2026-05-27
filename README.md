@@ -75,6 +75,9 @@ the claude.ai connector regression is resolved (see below).
 | `recommendations` | Top jobs ranked by composite match against the user's profile |
 | `salary_benchmark` | Percentile + career-ladder benchmark vs the live market for a role/seniority |
 | `skill_gap` | Compare user skills to desired-roles' market requirements; ranked missing skills |
+| `market_position` | 0–100 market-position score (skill demand, seniority fit, remote, breadth) + matching jobs, salary median, top-aligned companies |
+| `skill_impact` | Simulate learning each missing skill: jobs unlocked, boosted matches, companies needing it — ranked by impact |
+| `watchlist_intelligence` | Aggregate hiring signals across every watched company: open jobs, week-over-week trend %, top skills, median salary, sparkline |
 
 **Premium tier** (requires `premium`):
 
