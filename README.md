@@ -96,7 +96,7 @@ the claude.ai connector regression is resolved (see below).
 | `compare_companies` | Up to 5 companies side-by-side: current state + monthly trajectory |
 | `find_companies` | Multi-axis segmentation: industry × family × skill × trend × job-count band |
 | `find_breakout_companies` | Companies with extreme hiring growth (% threshold + min size) |
-| `find_emerging_skills` | Low-adoption skills growing fast (the "what should I learn before everyone else" tool) |
+| `find_emerging_skills` | Skills climbing *consistently* across the last 3 monthly snapshots from a low base, with a real absolute company-count gain — early signal, not small-base noise (the "what should I learn before everyone else" tool) |
 
 Pro+ tools are thin wrappers over the website's existing intelligence
 Lambdas. Tier gating happens server-side in those Lambdas — the MCP server
@@ -113,6 +113,20 @@ npm install
 npm run build       # tsc → dist/
 node dist/index.js  # waits on stdin/stdout for JSON-RPC
 ```
+
+## Releasing
+
+Publishing is automated by GitHub Actions (`.github/workflows/release.yml`).
+Pushing a version tag builds, publishes to npm, and updates the MCP Registry:
+
+```bash
+npm version patch          # bumps package.json + creates the vX.Y.Z tag
+git push && git push --tags
+```
+
+The workflow verifies the tag matches `package.json`, then runs `npm publish`
+(using the `NPM_TOKEN` repo secret) and a best-effort MCP Registry update via
+GitHub OIDC. Keep `server.json`'s `version` in step with `package.json`.
 
 ## Configuration
 
