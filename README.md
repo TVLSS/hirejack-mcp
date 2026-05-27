@@ -61,6 +61,7 @@ the claude.ai connector regression is resolved (see below).
 | Tool | Purpose |
 |------|---------|
 | `search_jobs` | Search live tech job postings: role family, seniority, skill, location, salary, remote, visa |
+| `get_job` | Fetch one job posting by domain + jobId or HireJack URL: full details, salary, skills, AI summary |
 | `get_company_profile` | Full hiring profile for one company (tech stack, trends, salary, AI brief) |
 | `search_companies` | List tracked companies, filter by industry |
 | `get_market_pulse` | Market-wide stats: totals, top skills, trending skills, top companies |
