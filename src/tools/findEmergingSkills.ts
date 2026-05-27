@@ -4,41 +4,61 @@ import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
 const inputSchema = z.object({
-  adoptionMin: z
+  adoptionMin: z.coerce
     .number()
     .int()
     .min(1)
     .optional()
     .describe(
-      "Minimum companies that must currently mention the skill (default 3). " +
+      "Minimum companies that must currently mention the skill (default 5). " +
         "Lower = catches earlier-stage skills.",
     ),
-  adoptionMax: z
+  adoptionMax: z.coerce
     .number()
     .int()
     .min(1)
     .optional()
     .describe(
-      "Maximum companies — excludes already-mainstream skills (default 30). " +
+      "Maximum companies — excludes already-mainstream skills (default 25). " +
         "The point is to find what's *emerging*, not what's already everywhere.",
     ),
-  growthMin: z
+  growthMin: z.coerce
     .number()
     .int()
     .min(0)
     .optional()
-    .describe("Minimum month-over-month growth percentage (default 25)"),
-  limit: z.number().int().min(1).max(50).optional().describe("Max skills to return (default 20)"),
+    .describe("Minimum growth percentage across the snapshot window (default 30)"),
+  minDelta: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe(
+      "Minimum ABSOLUTE company-count gain over the window (default 4). Filters " +
+        "small-base noise — a skill going 2→4 is +100% but only +2 companies.",
+    ),
+  baseMax: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      "Maximum companies at the START of the window (default 8). Enforces the " +
+        "'started obscure' criterion so already-established skills don't qualify.",
+    ),
+  limit: z.coerce.number().int().min(1).max(50).optional().describe("Max skills to return (default 20)"),
 });
 
 export const findEmergingSkillsTool: Tool = {
   name: "find_emerging_skills",
   description:
-    "Skills with low-but-growing market adoption — early-stage signals. " +
-    "Pro+ tier. Computes month-over-month growth in companyCount across " +
-    "the most recent two monthly snapshots, filters to skills with low " +
-    "current adoption (the 'emerging' criterion). Use for 'what skills are " +
-    "quietly trending?' or 'what should I learn before everyone else?'.",
+    "Skills with low-but-consistently-growing market adoption — early-stage signals. " +
+    "Pro+ tier. Tracks companyCount across the last 3 monthly snapshots and " +
+    "surfaces skills that climbed consistently (non-decreasing) from a low base, " +
+    "with a meaningful absolute company-count gain — not just a big percentage on a " +
+    "tiny base. Use for 'what skills are quietly trending?' or 'what should I learn " +
+    "before everyone else?'. Returns a deliberately tight list; loosen minDelta / " +
+    "baseMax / growthMin to widen it.",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {
