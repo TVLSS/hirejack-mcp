@@ -53,12 +53,13 @@ export const findEmergingSkillsTool: Tool = {
   name: "find_emerging_skills",
   description:
     "Skills with low-but-consistently-growing market adoption — early-stage signals. " +
-    "Pro+ tier. Tracks companyCount across the last 3 monthly snapshots and " +
+    "Analyst tier. Tracks companyCount across the last 3 monthly snapshots and " +
     "surfaces skills that climbed consistently (non-decreasing) from a low base, " +
     "with a meaningful absolute company-count gain — not just a big percentage on a " +
     "tiny base. Use for 'what skills are quietly trending?' or 'what should I learn " +
-    "before everyone else?'. Returns a deliberately tight list; loosen minDelta / " +
-    "baseMax / growthMin to widen it.",
+    "before everyone else?'. Defaults: adoptionMin 5, adoptionMax 25, growthMin 30%, " +
+    "minDelta 4, baseMax 8, limit 20. Returns a deliberately tight list; loosen " +
+    "minDelta / baseMax / growthMin to widen it.",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

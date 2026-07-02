@@ -37,7 +37,7 @@ export const getCompanyProfileTool: Tool = {
         `/companies/${encodeURIComponent(domain)}`,
       );
       return toolResult({
-        data: profile,
+        data: slimProfile(profile),
         citation_url: siteUrl(`/companies/${domain}/`),
       });
     } catch (err) {
@@ -55,3 +55,27 @@ export const getCompanyProfileTool: Tool = {
     }
   },
 };
+
+// Every other public tool maps its upstream payload; this one used to pass
+// the raw profile through. Drop internal fields (ATS platform is deliberately
+// hidden from all public surfaces per site policy) and cap the long-tail
+// arrays — topSkills alone is ~1.9KB of the ~8.5KB response.
+function slimProfile(p: CompanyProfile) {
+  const {
+    atsType: _atsType,
+    careerUrl: _careerUrl,
+    ...rest
+  } = p as Record<string, unknown>;
+  const capped: Record<string, unknown> = { ...rest };
+  for (const [key, cap] of [
+    ["topSkills", 15],
+    ["techStack", 15],
+    ["topTitles", 10],
+    ["topLocations", 10],
+  ] as const) {
+    if (Array.isArray(capped[key])) {
+      capped[key] = (capped[key] as unknown[]).slice(0, cap);
+    }
+  }
+  return capped;
+}

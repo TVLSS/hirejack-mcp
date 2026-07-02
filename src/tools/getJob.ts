@@ -21,9 +21,10 @@ const inputSchema = z
       .string()
       .optional()
       .describe(
-        "Job canonical id, exactly as returned in `search_jobs` results (the " +
-          "`id` field, with '#' already replaced by '-'). Required unless " +
-          "`url` is provided.",
+        "Job canonical id — pass the `id` field from a `search_jobs` result " +
+          "VERBATIM (it may contain '#' separators, e.g. " +
+          "'greenhouse#stripe#4921361'; keep them). The dashed URL form also " +
+          "works. Required unless `url` is provided.",
       ),
     url: z
       .string()
@@ -127,7 +128,7 @@ export const getJobTool: Tool = {
 
       return toolResult({
         data: slim(job),
-        citation_url: siteUrl(`/jobs/${domain}/${jobId}/`),
+        citation_url: siteUrl(`/jobs/${domain}/${jobId.replace(/#/g, "-")}/`),
         meta: {
           // Surface when a Free-tier paywall would gate the full description
           // on the website (the slim payload here does NOT include the

@@ -91,14 +91,31 @@ export const TOOLS: Tool[] = [
 
 const TOOLS_BY_NAME = new Map(TOOLS.map((t) => [t.name, t]));
 
+// Human-friendly title derived from the tool name ("search_jobs" → "Search
+// Jobs"). All HireJack tools are read-only queries against our own API, so
+// they uniformly get readOnlyHint (clients use it to reduce approval
+// friction) and openWorldHint: false (closed domain — no external services).
+function titleFromName(name: string): string {
+  return name
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 export function listTools() {
   return TOOLS.map((t) => ({
     name: t.name,
+    title: titleFromName(t.name),
     description: t.description,
     inputSchema: zodToJsonSchema(t.inputSchema, {
       $refStrategy: "none",
       target: "openApi3",
     }),
+    annotations: {
+      title: titleFromName(t.name),
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   }));
 }
 
@@ -116,7 +133,13 @@ export async function callTool(
       ],
     };
   }
-  const parsed = tool.inputSchema.safeParse(args ?? {});
+  // Some clients send scalar/null args for zero-parameter tools (observed in
+  // production: get_market_pulse called with a bare number). Every tool
+  // schema is an object, so coerce non-object args to {} — schemas with
+  // required keys still fail with a clear per-field message below.
+  const normalizedArgs =
+    args !== null && typeof args === "object" && !Array.isArray(args) ? args : {};
+  const parsed = tool.inputSchema.safeParse(normalizedArgs);
   if (!parsed.success) {
     return {
       isError: true,
@@ -137,7 +160,7 @@ export async function callTool(
 export const SERVER_INFO = {
   name: "hirejack",
   title: "HireJack",
-  version: "0.4.0",
+  version: "0.4.1",
   icons: [
     {
       src: "https://hirejack.com/apple-touch-icon.png",

@@ -27,16 +27,22 @@ const inputSchema = z.object({
     .describe("Industry substring filter (case-insensitive). E.g. 'fintech', 'health', 'AI', 'defense'."),
   family: z.enum(FAMILIES).optional().describe("Companies hiring for this role family"),
   skill: z.string().optional().describe("Companies whose top skills include this (substring match)"),
-  trend: z.enum(["up", "down", "stable"]).optional().describe("Hiring trend filter"),
-  minJobs: z.number().int().min(0).optional().describe("Minimum total open jobs (default 0)"),
-  maxJobs: z.number().int().min(0).optional().describe("Maximum total open jobs"),
-  limit: z.number().int().min(1).max(100).optional().describe("Max companies to return (default 25)"),
+  trend: z
+    .enum(["up", "down", "stable"])
+    .optional()
+    .describe(
+      "Hiring trend filter, from each company's 2-month rolling job-count " +
+        "average: 'up' = growing, 'down' = shrinking, 'stable' = flat.",
+    ),
+  minJobs: z.coerce.number().int().min(0).optional().describe("Minimum total open jobs (default 0)"),
+  maxJobs: z.coerce.number().int().min(0).optional().describe("Maximum total open jobs (default unlimited)"),
+  limit: z.coerce.number().int().min(1).max(100).optional().describe("Max companies to return (default 25)"),
 });
 
 export const findCompaniesTool: Tool = {
   name: "find_companies",
   description:
-    "Multi-axis company segmentation. Pro+ tier. Filter by industry, role " +
+    "Multi-axis company segmentation. Analyst tier. Filter by industry, role " +
     "family they're hiring for, top-skill match, hiring trend, job-count " +
     "range. Returns companies sorted by total open jobs descending. Use for " +
     "'fintech companies hiring ML engineers', 'defense tech companies " +

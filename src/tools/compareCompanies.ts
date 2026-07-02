@@ -12,7 +12,7 @@ const inputSchema = z.object({
       "Up to 5 company domains to compare side-by-side (e.g. " +
         "['stripe.com', 'plaid.com', 'adyen.com'])",
     ),
-  months: z
+  months: z.coerce
     .number()
     .int()
     .min(1)
@@ -24,7 +24,7 @@ const inputSchema = z.object({
 export const compareCompaniesTool: Tool = {
   name: "compare_companies",
   description:
-    "Compare hiring profiles of multiple companies side-by-side. Pro+ " +
+    "Compare hiring profiles of multiple companies side-by-side. Analyst tier. " +
     "tier. Returns per-company current state (totalJobs, medianSalary, " +
     "trend, top skills) plus monthly snapshot history for the chosen " +
     "window. Up to 5 companies. Use for 'compare hiring at Stripe vs " +

@@ -3,7 +3,9 @@ import { apiGet, siteUrl, ApiError } from "../lib/api.js";
 import { toolResult, toolError } from "../lib/format.js";
 import type { Tool } from "../registry.js";
 
-const inputSchema = z.object({}).strict();
+// Non-strict like every other tool: unknown keys are ignored rather than
+// erroring (clients occasionally send junk args to no-parameter tools).
+const inputSchema = z.object({});
 type Args = z.infer<typeof inputSchema>;
 
 type Stats = Record<string, unknown> & {

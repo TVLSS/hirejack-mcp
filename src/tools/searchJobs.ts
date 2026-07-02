@@ -40,7 +40,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Free-text keyword search (case-sensitive substring) across raw and " +
+      "Free-text keyword search (case-insensitive substring) across raw and " +
         "standardized title, company name, company domain, and location. " +
         "Tip: use the `skill` parameter for skill matches — `q` does NOT " +
         "search job descriptions or the skill list.",
@@ -67,7 +67,15 @@ const inputSchema = z.object({
       "Location substring filter, e.g. 'San Francisco' or 'New York'",
     ),
   remote: z.enum(REMOTE_MODES).optional().describe("Remote policy filter"),
-  salary_min: z
+  posted_since: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format")
+    .optional()
+    .describe(
+      "Only include jobs posted on or after this date (YYYY-MM-DD). " +
+        "E.g. for 'jobs posted this week', pass the date 7 days ago.",
+    ),
+  salary_min: z.coerce
     .number()
     .int()
     .optional()
@@ -76,7 +84,7 @@ const inputSchema = z.object({
         "salary range *could pay at least* this much (i.e. salaryMax >= X). " +
         "A job with range $150K–$250K matches salary_min=200000.",
     ),
-  salary_max: z
+  salary_max: z.coerce
     .number()
     .int()
     .optional()
@@ -92,13 +100,21 @@ const inputSchema = z.object({
     .enum(VISA_VALUES)
     .optional()
     .describe("Visa sponsorship: 'yes' or 'no'"),
-  limit: z
+  limit: z.coerce
     .number()
     .int()
     .min(1)
     .max(100)
     .optional()
     .describe("Max results to return (default 25, max 100)"),
+  cursor: z
+    .string()
+    .optional()
+    .describe(
+      "Opaque pagination cursor from a previous search_jobs call's " +
+        "`meta.next_cursor`. Pass it back (with the SAME filters) to fetch " +
+        "the next page of results.",
+    ),
 });
 
 type Args = z.infer<typeof inputSchema>;
@@ -155,6 +171,8 @@ export const searchJobsTool: Tool = {
         salaryMax: args.salary_max,
         hasSalary: args.has_salary ? "1" : undefined,
         visa: args.visa,
+        postedSince: args.posted_since,
+        cursor: args.cursor,
         limit,
       });
 
@@ -165,6 +183,7 @@ export const searchJobsTool: Tool = {
         citation_url: siteUrl("/jobs.html"),
         meta: {
           filters: stripUndefined(args),
+          next_cursor: data.cursor,
           note: jobs.length === 0 ? buildEmptyNote(args) : undefined,
         },
       });
@@ -180,10 +199,12 @@ export const searchJobsTool: Tool = {
 };
 
 function slimJob(j: JobItem) {
-  // Use the URL-safe form for `id` so callers that construct links from id +
-  // company_domain (instead of using detail_url verbatim) also produce valid
-  // URLs. The raw canonicalId contains '#' chars which break URL paths.
-  const id = j.canonicalId ? safeId(j.canonicalId) : undefined;
+  // `id` is the raw canonicalId — pass it straight back to `get_job` or any
+  // other tool that needs to identify the job. URL construction (`detail_url`
+  // below) handles the URL-safe substitution separately so we don't lose
+  // round-trip identity at the MCP boundary.
+  const id = j.canonicalId;
+  const urlSafeId = j.canonicalId ? safeId(j.canonicalId) : undefined;
   return {
     id,
     title: j.standardizedTitle || j.titleRaw,
@@ -207,8 +228,8 @@ function slimJob(j: JobItem) {
     remote_policy: j.remotePolicy,
     apply_url: j.url,
     detail_url:
-      j.companyDomain && id
-        ? siteUrl(`/jobs/${j.companyDomain}/${id}/`)
+      j.companyDomain && urlSafeId
+        ? siteUrl(`/jobs/${j.companyDomain}/${urlSafeId}/`)
         : undefined,
   };
 }

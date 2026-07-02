@@ -33,9 +33,15 @@ const SENIORITIES = [
 ] as const;
 
 const inputSchema = z.object({
-  family: z.enum(FAMILIES).optional().describe("Role family to benchmark against"),
-  seniority: z.enum(SENIORITIES).optional().describe("Seniority level to benchmark against"),
-  salary: z
+  family: z
+    .enum(FAMILIES)
+    .optional()
+    .describe("Role family to benchmark against. Omit to benchmark against the whole market."),
+  seniority: z
+    .enum(SENIORITIES)
+    .optional()
+    .describe("Seniority level to benchmark against. Omit to include all seniority levels in the slice."),
+  salary: z.coerce
     .number()
     .int()
     .optional()
