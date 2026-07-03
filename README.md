@@ -28,24 +28,45 @@ claude mcp add hirejack -- npx -y @hirejack/mcp
 }
 ```
 
-Restart Claude Desktop. Then try:
+Restart Claude Desktop and ask away (see [Example prompts](#example-prompts)).
+
+The npm package uses **stdio transport** — no auth, runs locally as a
+subprocess, and the five public tools work out of the box.
+
+**claude.ai / Claude Desktop connector (all 22 tools):** add
+`https://hirejack.com/api/mcp` as a custom connector (Settings → Connectors →
+Add custom connector), sign in with your HireJack account when prompted, and
+the full Pro/Premium/Analyst intelligence surface lights up — tier-gated
+server-side to your subscription.
+
+## Example prompts
+
+**Job search (public, no account):**
 
 - *"Find remote senior backend roles paying $200K+ that sponsor visas"*
-- *"What is Stripe currently hiring?"*
-- *"Which fintech companies are scaling fastest?"*
+- *"What is Stripe currently hiring? Break it down by team."*
+- *"Show me staff-level ML jobs in New York with published salary ranges"*
+- *"Which companies are hiring Rust engineers right now?"*
+
+**Market research (public, no account):**
+
+- *"Which fintech companies are scaling hiring fastest this month?"*
 - *"What skills are trending in tech right now?"*
+- *"Compare the tech stacks of Datadog and Grafana Labs"*
+- *"What's the median advertised salary for senior data engineers?"*
 
-The npm package uses **stdio transport** — no auth, runs locally as a subprocess.
-The public tools work out of the box. Pro+ intelligence tools (`match_job`,
-`company_fit`, `resume_rewrite`, etc.) require an authenticated user; for that
-you'll want the hosted HTTP transport at `https://hirejack.com/api/mcp` once
-the claude.ai connector regression is resolved (see below).
+**Career intelligence (Pro/Premium, via the hosted connector):**
 
-> **Why stdio first?** The hosted HTTP transport at `https://hirejack.com/api/mcp`
-> works end-to-end via direct API (curl/SDK), but claude.ai's web connector and
-> Claude Desktop's remote MCP UI have an upstream auth-handshake regression that
-> drops the connection after OAuth succeeds. Stdio sidesteps the bug entirely.
-> Tracking: [anthropics/claude-ai-mcp#136](https://github.com/anthropics/claude-ai-mcp/issues/136).
+- *"Score my fit for this posting and tell me what's missing: hirejack.com/jobs/…"*
+- *"Which skill should I learn next to unlock the most jobs?"*
+- *"Where does my salary sit vs the market for staff platform engineers?"*
+- *"Rewrite my resume bullets for this Anthropic role"*
+
+**Analyst (historical/segmentation, via the hosted connector):**
+
+- *"Which companies' hiring grew >50% in the last quarter from a real base?"*
+- *"Show Nvidia's hiring trajectory over the last 12 months"*
+- *"What skills are climbing consistently from a low base — early signals only"*
 
 ## Transports
 
@@ -86,7 +107,7 @@ the claude.ai connector regression is resolved (see below).
 | `resume_rewrite` | Bullet-by-bullet resume rewrites tailored to a specific job |
 | `interview_prep` | Targeted prep: key topics, likely questions by type, company research items |
 
-**Analyst** (Pro+ tier today; will tighten to a dedicated `analyst` tier when that pricing plan ships):
+**Analyst** (dedicated [Analyst tier](https://hirejack.com/analyst/) — $49/mo founding pricing; free for working journalists in exchange for a linked citation):
 
 | Tool | Purpose |
 |------|---------|
