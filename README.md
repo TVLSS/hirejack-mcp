@@ -5,6 +5,7 @@ intelligence to MCP-compatible clients (Claude Desktop, Claude Code, Cursor,
 Cline, etc.) — tech jobs, companies, skills, salaries, hiring trends.
 
 [![npm](https://img.shields.io/npm/v/@hirejack/mcp.svg)](https://www.npmjs.com/package/@hirejack/mcp)
+[![Glama score](https://glama.ai/mcp/servers/TVLSS/hirejack-mcp/badges/score.svg)](https://glama.ai/mcp/servers/TVLSS/hirejack-mcp)
 
 ## Quick start
 
