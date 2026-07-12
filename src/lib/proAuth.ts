@@ -18,16 +18,18 @@ export type ProToolDeps = {
   toolLabel: string;
   /** True when the tool is Premium-only (helps with the upgrade hint). */
   premium?: boolean;
+  /** Tool needs only an authenticated account, not a paid tier (account-action tools). */
+  anyTier?: boolean;
 };
 
 export function requireUser(deps: ProToolDeps): { error: ToolResponse } | { token: string } {
   // In stdio (this package), ctx.userId is always absent.
   // Pro+/Analyst tools require the hosted OAuth endpoint.
   if (!deps.ctx.userId) {
-    const tier = deps.premium ? "Premium" : "Pro or Premium";
+    const tier = deps.anyTier ? "" : deps.premium ? " Premium" : " Pro or Premium";
     return {
       error: toolError(
-        `${deps.toolLabel} requires an authenticated HireJack ${tier} account. ` +
+        `${deps.toolLabel} requires an authenticated HireJack${tier} account. ` +
           `Connect via the hosted MCP endpoint at https://hirejack.com/api/mcp ` +
           `(OAuth 2.1 + PKCE) — the stdio package only supports public tools.`,
       ),

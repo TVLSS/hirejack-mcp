@@ -100,6 +100,20 @@ const inputSchema = z.object({
     .enum(VISA_VALUES)
     .optional()
     .describe("Visa sponsorship: 'yes' or 'no'"),
+  education: z
+    .enum(["none", "associate", "bachelor", "master", "phd"])
+    .optional()
+    .describe(
+      "Minimum degree the job requires (AI-extracted). E.g. 'bachelor' " +
+        "returns jobs whose stated requirement is exactly a bachelor's.",
+    ),
+  experience: z
+    .enum(["0-2", "3-5", "5-10", "10+"])
+    .optional()
+    .describe(
+      "Years-of-experience bucket the job asks for (AI-extracted yearsMin). " +
+        "E.g. '0-2' for entry-level-friendly roles, '10+' for very senior ones.",
+    ),
   limit: z.coerce
     .number()
     .int()
@@ -137,6 +151,8 @@ type JobItem = {
   skillNames?: string[];
   visaSponsorship?: string;
   remotePolicy?: string;
+  education?: string;
+  yearsMin?: number;
 };
 
 type ListJobsResponse = {
@@ -171,6 +187,8 @@ export const searchJobsTool: Tool = {
         salaryMax: args.salary_max,
         hasSalary: args.has_salary ? "1" : undefined,
         visa: args.visa,
+        education: args.education,
+        experience: args.experience,
         postedSince: args.posted_since,
         cursor: args.cursor,
         limit,
@@ -226,6 +244,8 @@ function slimJob(j: JobItem) {
     skills: (j.skillNames || []).slice(0, 12),
     visa_sponsorship: j.visaSponsorship,
     remote_policy: j.remotePolicy,
+    education: j.education,
+    years_min: j.yearsMin,
     apply_url: j.url,
     detail_url:
       j.companyDomain && urlSafeId

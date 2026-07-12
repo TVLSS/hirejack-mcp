@@ -36,11 +36,13 @@ export const matchJobTool: Tool = {
   name: "match_job",
   description:
     "Score how well the authenticated user matches a specific job. Pro tier. " +
-    "Returns matchPct (0-100), 5-dimension breakdown (skills 50%, role 20%, " +
-    "seniority 10%, location 10%, remote 10%), matched/missing/bonus skill " +
-    "lists, ATS-specific resume tips for the company's ATS, and a " +
-    "priorityScore that factors hiring velocity. Use for queries like 'how " +
-    "well do I match this job?' or 'should I apply?'.",
+    "Returns matchPct (0-100), a dimension breakdown (skills, role, " +
+    "seniority, location, remote — plus experience when both the user's " +
+    "resume-derived years and the job's required years are known), " +
+    "matched/missing/bonus skill lists, an experienceFit comparison, " +
+    "ATS-specific resume tips for the company's ATS, and a priorityScore " +
+    "that factors hiring velocity. Use for queries like 'how well do I " +
+    "match this job?' or 'should I apply?'.",
   inputSchema,
   handler: async (args, ctx) => {
     const ref = resolveJobRef(args);

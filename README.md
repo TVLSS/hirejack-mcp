@@ -34,7 +34,7 @@ Restart Claude Desktop and ask away (see [Example prompts](#example-prompts)).
 The npm package uses **stdio transport** — no auth, runs locally as a
 subprocess, and the five public tools work out of the box.
 
-**claude.ai / Claude Desktop connector (all 22 tools):** add
+**claude.ai / Claude Desktop connector (all 25 tools):** add
 `https://hirejack.com/api/mcp` as a custom connector (Settings → Connectors →
 Add custom connector), sign in with your HireJack account when prompted, and
 the full Pro/Premium/Analyst intelligence surface lights up — tier-gated
@@ -74,7 +74,7 @@ server-side to your subscription.
 | Transport | Where | Tools available |
 |-----------|-------|-----------------|
 | **stdio** (this package) | `npx -y @hirejack/mcp` | 5 public tools (`search_jobs`, `get_job`, `get_company_profile`, `search_companies`, `get_market_pulse`). Pro+/Analyst tools surface but require auth — point users at the hosted endpoint. |
-| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 22 tools, including Pro+/Analyst intelligence tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
+| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 25 tools, including Pro+/Analyst intelligence and account actions tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
 
 ## Tools
 
@@ -82,7 +82,7 @@ server-side to your subscription.
 
 | Tool | Purpose |
 |------|---------|
-| `search_jobs` | Search live tech job postings: role family, seniority, skill, location, salary, remote, visa |
+| `search_jobs` | Search live tech job postings: role family, seniority, skill, location, salary, remote, visa, education, experience |
 | `get_job` | Fetch one job posting by domain + jobId or HireJack URL: full details, salary, skills, AI summary |
 | `get_company_profile` | Full hiring profile for one company (tech stack, trends, salary, AI brief) |
 | `search_companies` | List tracked companies, filter by industry |
@@ -119,6 +119,19 @@ server-side to your subscription.
 | `find_companies` | Multi-axis segmentation: industry × family × skill × trend × job-count band |
 | `find_breakout_companies` | Companies with extreme hiring growth (% threshold + min size) |
 | `find_emerging_skills` | Skills climbing *consistently* across the last 3 monthly snapshots from a low base, with a real absolute company-count gain — early signal, not small-base noise (the "what should I learn before everyone else" tool) |
+
+**Account actions** (any authenticated HireJack account — the write side of the product):
+
+| Tool | Purpose |
+|------|---------|
+| `save_job` | Save a job to (or remove it from) the user's saved-jobs list |
+| `watch_company` | Follow (or unfollow) a company — powers watchlist intelligence, alerts, and the weekly digest |
+| `track_application` | Track an application through the pipeline: applied → phone_screen → interview → offer / rejected / withdrawn, with notes |
+
+Unlike the website's toggle endpoints, these use explicit, idempotent
+actions (state is checked first), so an agent retrying a "save" can never
+silently unsave. They are the only non-read-only tools and are annotated
+`readOnlyHint: false` so MCP clients ask for approval appropriately.
 
 Pro+ tools are thin wrappers over the website's existing intelligence
 Lambdas. Tier gating happens server-side in those Lambdas — the MCP server
@@ -171,7 +184,7 @@ src/
 │   ├── api.ts          # HireJack REST client
 │   ├── format.ts       # tool result helpers
 │   └── proAuth.ts      # Pro+ auth check (returns "use hosted endpoint" in stdio)
-└── tools/              # 22 tool implementations
+└── tools/              # 25 tool implementations
 ```
 
 ## License

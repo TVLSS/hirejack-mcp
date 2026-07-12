@@ -25,6 +25,9 @@ import { compareCompaniesTool } from "./tools/compareCompanies.js";
 import { findCompaniesTool } from "./tools/findCompanies.js";
 import { findBreakoutCompaniesTool } from "./tools/findBreakoutCompanies.js";
 import { findEmergingSkillsTool } from "./tools/findEmergingSkills.js";
+import { saveJobTool } from "./tools/saveJob.js";
+import { watchCompanyTool } from "./tools/watchCompany.js";
+import { trackApplicationTool } from "./tools/trackApplication.js";
 
 export type ToolContent = {
   type: "text";
@@ -57,6 +60,15 @@ export type Tool = {
   description: string;
   inputSchema: z.ZodTypeAny;
   handler: (args: any, ctx: ToolContext) => Promise<ToolResponse>;
+  /** Per-tool annotation overrides. Defaults (readOnlyHint: true) fit the
+   *  query tools; the account-action tools (save_job, watch_company,
+   *  track_application) set readOnlyHint: false so clients surface them for
+   *  approval correctly. */
+  annotations?: {
+    readOnlyHint?: boolean;
+    idempotentHint?: boolean;
+    destructiveHint?: boolean;
+  };
 };
 
 export const TOOLS: Tool[] = [
@@ -87,6 +99,13 @@ export const TOOLS: Tool[] = [
   findCompaniesTool,
   findBreakoutCompaniesTool,
   findEmergingSkillsTool,
+  // Account actions — write tools (readOnlyHint: false). Any authenticated
+  // tier; idempotent explicit-action semantics over the website's toggles.
+  // Like all authenticated tools, they require the hosted OAuth endpoint —
+  // in stdio they surface a clear pointer to https://hirejack.com/api/mcp.
+  saveJobTool,
+  watchCompanyTool,
+  trackApplicationTool,
 ];
 
 const TOOLS_BY_NAME = new Map(TOOLS.map((t) => [t.name, t]));
@@ -113,8 +132,10 @@ export function listTools() {
     }),
     annotations: {
       title: titleFromName(t.name),
-      readOnlyHint: true,
+      readOnlyHint: t.annotations?.readOnlyHint ?? true,
       openWorldHint: false,
+      ...(t.annotations?.idempotentHint !== undefined ? { idempotentHint: t.annotations.idempotentHint } : {}),
+      ...(t.annotations?.destructiveHint !== undefined ? { destructiveHint: t.annotations.destructiveHint } : {}),
     },
   }));
 }
@@ -160,7 +181,7 @@ export async function callTool(
 export const SERVER_INFO = {
   name: "hirejack",
   title: "HireJack",
-  version: "0.4.1",
+  version: "0.2.0", // keep in lockstep with package.json + server.json on each release
   icons: [
     {
       src: "https://hirejack.com/apple-touch-icon.png",

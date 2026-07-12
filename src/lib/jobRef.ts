@@ -77,3 +77,26 @@ export async function apiGetJobVariants(
   }
   throw lastErr;
 }
+
+/** Resolve a job reference to its live record (public endpoint, variant-
+ *  tolerant). Write tools use this so DynamoDB writes are keyed by the TRUE
+ *  raw canonicalId — writing a URL-safe (dashed) id would create items the
+ *  website's own save/apply UI can't see. Returns null when the job doesn't
+ *  exist (also validates the target before any write). */
+export async function resolveCanonicalJob(
+  domain: string,
+  jobId: string,
+): Promise<{ canonicalId: string; titleRaw?: string; companyName?: string } | null> {
+  for (const variant of jobIdVariants(jobId)) {
+    try {
+      const job = await apiGet<{ canonicalId?: string; titleRaw?: string; companyName?: string }>(
+        `/companies/${encodeURIComponent(domain)}/jobs/${encodeURIComponent(variant)}`,
+      );
+      if (job?.canonicalId) return { canonicalId: job.canonicalId, titleRaw: job.titleRaw, companyName: job.companyName };
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) continue;
+      throw e;
+    }
+  }
+  return null;
+}
