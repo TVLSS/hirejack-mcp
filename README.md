@@ -34,7 +34,7 @@ Restart Claude Desktop and ask away (see [Example prompts](#example-prompts)).
 The npm package uses **stdio transport** — no auth, runs locally as a
 subprocess, and the five public tools work out of the box.
 
-**claude.ai / Claude Desktop connector (all 25 tools):** add
+**claude.ai / Claude Desktop connector (all 27 tools):** add
 `https://hirejack.com/api/mcp` as a custom connector (Settings → Connectors →
 Add custom connector), sign in with your HireJack account when prompted, and
 the full Pro/Premium/Analyst intelligence surface lights up — tier-gated
@@ -74,7 +74,7 @@ server-side to your subscription.
 | Transport | Where | Tools available |
 |-----------|-------|-----------------|
 | **stdio** (this package) | `npx -y @hirejack/mcp` | 5 public tools (`search_jobs`, `get_job`, `get_company_profile`, `search_companies`, `get_market_pulse`). Pro+/Analyst tools surface but require auth — point users at the hosted endpoint. |
-| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 25 tools, including Pro+/Analyst intelligence and account actions tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
+| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 27 tools, including Pro+/Analyst intelligence and account actions tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
 
 ## Tools
 
@@ -127,6 +127,8 @@ server-side to your subscription.
 | `save_job` | Save a job to (or remove it from) the user's saved-jobs list |
 | `watch_company` | Follow (or unfollow) a company — powers watchlist intelligence, alerts, and the weekly digest |
 | `track_application` | Track an application through the pipeline: applied → phone_screen → interview → offer / rejected / withdrawn, with notes |
+| `list_saved_jobs` | List the user's saved jobs (read companion to `save_job`), flagging postings that have since closed |
+| `list_applications` | List tracked applications with their pipeline stage (read companion to `track_application`) |
 
 Unlike the website's toggle endpoints, these use explicit, idempotent
 actions (state is checked first), so an agent retrying a "save" can never

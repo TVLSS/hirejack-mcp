@@ -28,6 +28,7 @@ import { findEmergingSkillsTool } from "./tools/findEmergingSkills.js";
 import { saveJobTool } from "./tools/saveJob.js";
 import { watchCompanyTool } from "./tools/watchCompany.js";
 import { trackApplicationTool } from "./tools/trackApplication.js";
+import { listSavedJobsTool, listApplicationsTool } from "./tools/listMyJobs.js";
 
 export type ToolContent = {
   type: "text";
@@ -106,6 +107,9 @@ export const TOOLS: Tool[] = [
   saveJobTool,
   watchCompanyTool,
   trackApplicationTool,
+  // Account reads — companions to the writes above (any authenticated tier).
+  listSavedJobsTool,
+  listApplicationsTool,
 ];
 
 const TOOLS_BY_NAME = new Map(TOOLS.map((t) => [t.name, t]));
@@ -181,7 +185,7 @@ export async function callTool(
 export const SERVER_INFO = {
   name: "hirejack",
   title: "HireJack",
-  version: "0.2.0", // keep in lockstep with package.json + server.json on each release
+  version: "0.2.1", // keep in lockstep with package.json + server.json on each release
   icons: [
     {
       src: "https://hirejack.com/apple-touch-icon.png",
