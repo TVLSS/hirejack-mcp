@@ -43,19 +43,22 @@ export const listWatchlistTool: Tool = {
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;
     try {
-      const resp = await apiGet<{ companies?: WatchRow[]; count?: number }>(
+      const resp = await apiGet<{ companies?: WatchRow[] }>(
         "/watchlist",
         {},
         { authToken: auth.token },
       );
       const limit = args.limit ?? 50;
+      // The endpoint returns no count field — total must be the pre-slice
+      // length or a 120-company watchlist reports total: 50 (2026-07-16 review).
+      const total = (resp.companies || []).length;
       const companies = (resp.companies || []).slice(0, limit).map((c) => ({
         company: c.companyName || c.domain,
         domain: c.domain,
         ...(c.followedAt ? { followed_at: c.followedAt.slice(0, 10) } : {}),
       }));
       return proResult(
-        { total: resp.count ?? companies.length, returned: companies.length, companies },
+        { total, returned: companies.length, companies },
         citationUrl,
       );
     } catch (e) {
