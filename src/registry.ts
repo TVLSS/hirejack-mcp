@@ -25,6 +25,7 @@ import { compareCompaniesTool } from "./tools/compareCompanies.js";
 import { findCompaniesTool } from "./tools/findCompanies.js";
 import { findBreakoutCompaniesTool } from "./tools/findBreakoutCompanies.js";
 import { findEmergingSkillsTool } from "./tools/findEmergingSkills.js";
+import { findEmergingRolesTool } from "./tools/findEmergingRoles.js";
 import { saveJobTool } from "./tools/saveJob.js";
 import { watchCompanyTool } from "./tools/watchCompany.js";
 import { trackApplicationTool } from "./tools/trackApplication.js";
@@ -102,6 +103,7 @@ export const TOOLS: Tool[] = [
   findCompaniesTool,
   findBreakoutCompaniesTool,
   findEmergingSkillsTool,
+  findEmergingRolesTool,
   // Account actions — write tools (readOnlyHint: false). Any authenticated
   // tier; idempotent explicit-action semantics over the website's toggles.
   // Like all authenticated tools, they require the hosted OAuth endpoint —
@@ -191,7 +193,7 @@ export async function callTool(
 export const SERVER_INFO = {
   name: "hirejack",
   title: "HireJack",
-  version: "0.3.0", // keep in lockstep with package.json + server.json on each release
+  version: "0.3.1", // keep in lockstep with package.json + server.json on each release
   icons: [
     {
       src: "https://hirejack.com/apple-touch-icon.png",
