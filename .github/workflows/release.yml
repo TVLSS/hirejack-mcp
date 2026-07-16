@@ -14,7 +14,7 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write # create GitHub Releases (Glama maintenance score checks releases, not tags)
   id-token: write # for MCP Registry GitHub-OIDC auth (no stored secret needed)
 
 jobs:
@@ -47,6 +47,14 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # GitHub Release — Glama's maintenance score checks for stable releases,
+      # not tags. Non-fatal: the npm publish above still stands if this fails.
+      - name: Create GitHub Release
+        continue-on-error: true
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       # Best-effort MCP Registry update via GitHub OIDC. Non-fatal: if it fails,
       # the npm publish above still stands and the registry can be updated
