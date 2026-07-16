@@ -119,8 +119,9 @@ server-side to your subscription.
 | `find_companies` | Multi-axis segmentation: industry × family × skill × trend × job-count band |
 | `find_breakout_companies` | Companies with extreme hiring growth (% threshold + min size) |
 | `find_emerging_skills` | Skills climbing *consistently* across the last 3 monthly snapshots from a low base, with a real absolute company-count gain — early signal, not small-base noise (the "what should I learn before everyone else" tool) |
+| `find_emerging_roles` | Roles gaining company adoption over a tunable window (default 21 days, daily rollup) plus genuinely new titles the classifier just started seeing — the role-level companion to `find_emerging_skills` |
 
-**Account actions** (any authenticated HireJack account — the write side of the product):
+**Account & profile** (any authenticated HireJack account — reads and writes on the user's own data):
 
 | Tool | Purpose |
 |------|---------|
@@ -129,11 +130,15 @@ server-side to your subscription.
 | `track_application` | Track an application through the pipeline: applied → phone_screen → interview → offer / rejected / withdrawn, with notes |
 | `list_saved_jobs` | List the user's saved jobs (read companion to `save_job`), flagging postings that have since closed |
 | `list_applications` | List tracked applications with their pipeline stage (read companion to `track_application`) |
+| `list_watchlist` | List watched companies (read companion to `watch_company`) |
+| `get_profile` | Read the user's profile: skills, desired roles, tier, and the matching preferences (seniority, city, remote, US-only, minimum salary) that hard-filter recommendations and alerts |
+| `update_preferences` | Update matching preferences from the conversation — minimum salary, require-listed-salary, remote / US-only, seniority, city — persists to the profile and re-filters everything immediately |
 
 Unlike the website's toggle endpoints, these use explicit, idempotent
 actions (state is checked first), so an agent retrying a "save" can never
-silently unsave. They are the only non-read-only tools and are annotated
-`readOnlyHint: false` so MCP clients ask for approval appropriately.
+silently unsave. The write tools (`save_job`, `watch_company`,
+`track_application`, `update_preferences`) are annotated `readOnlyHint:
+false` so MCP clients ask for approval appropriately.
 
 Pro+ tools are thin wrappers over the website's existing intelligence
 Lambdas. Tier gating happens server-side in those Lambdas — the MCP server
