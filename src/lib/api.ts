@@ -31,7 +31,7 @@ export async function apiGet<T = unknown>(
     }
   }
   const headers: Record<string, string> = {
-    "User-Agent": "hirejack-mcp/0.2",
+    "User-Agent": "hirejack-mcp/0.3",
   };
   if (opts.authToken) headers["Authorization"] = `Bearer ${opts.authToken}`;
 
@@ -56,13 +56,43 @@ export async function apiPost<T = unknown>(
 ): Promise<T> {
   const url = new URL(API_BASE + path);
   const headers: Record<string, string> = {
-    "User-Agent": "hirejack-mcp/0.2",
+    "User-Agent": "hirejack-mcp/0.3",
     "Content-Type": "application/json",
   };
   if (opts.authToken) headers["Authorization"] = `Bearer ${opts.authToken}`;
 
   const resp = await fetch(url, {
     method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    let msg = `HTTP ${resp.status}`;
+    try {
+      const j: any = await resp.json();
+      if (j?.error) msg = j.error;
+    } catch {
+      /* swallow */
+    }
+    throw new ApiError(resp.status, msg);
+  }
+  return resp.json() as Promise<T>;
+}
+
+export async function apiPut<T = unknown>(
+  path: string,
+  body: unknown,
+  opts: ApiOptions = {},
+): Promise<T> {
+  const url = new URL(API_BASE + path);
+  const headers: Record<string, string> = {
+    "User-Agent": "hirejack-mcp/0.3",
+    "Content-Type": "application/json",
+  };
+  if (opts.authToken) headers["Authorization"] = `Bearer ${opts.authToken}`;
+
+  const resp = await fetch(url, {
+    method: "PUT",
     headers,
     body: JSON.stringify(body),
   });

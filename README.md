@@ -34,7 +34,7 @@ Restart Claude Desktop and ask away (see [Example prompts](#example-prompts)).
 The npm package uses **stdio transport** — no auth, runs locally as a
 subprocess, and the five public tools work out of the box.
 
-**claude.ai / Claude Desktop connector (all 27 tools):** add
+**claude.ai / Claude Desktop connector (all 30 tools):** add
 `https://hirejack.com/api/mcp` as a custom connector (Settings → Connectors →
 Add custom connector), sign in with your HireJack account when prompted, and
 the full Pro/Premium/Analyst intelligence surface lights up — tier-gated
@@ -74,7 +74,7 @@ server-side to your subscription.
 | Transport | Where | Tools available |
 |-----------|-------|-----------------|
 | **stdio** (this package) | `npx -y @hirejack/mcp` | 5 public tools (`search_jobs`, `get_job`, `get_company_profile`, `search_companies`, `get_market_pulse`). Pro+/Analyst tools surface but require auth — point users at the hosted endpoint. |
-| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 27 tools, including Pro+/Analyst intelligence and account actions tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
+| **HTTP + OAuth 2.1** (HireJack-hosted) | `https://hirejack.com/api/mcp` | All 30 tools, including Pro+/Analyst intelligence and account actions tied to a HireJack subscription. Implementation lives in HireJack's private Lambda; this OSS package is the stdio half. |
 
 ## Tools
 

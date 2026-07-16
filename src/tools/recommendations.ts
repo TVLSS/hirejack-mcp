@@ -39,7 +39,8 @@ export const recommendationsTool: Tool = {
   description:
     "Get top job recommendations for the authenticated user, scored against " +
     "their profile (skills, desired roles, seniority, location, remote " +
-    "preference). Pro tier. Returns jobs ranked by composite match score " +
+    "preference) and hard-filtered by their remote/US-only/minimum-salary " +
+    "preferences. Pro tier. Returns jobs ranked by composite match score " +
     "with per-job match details (default 10, `limit` up to 50). Use for " +
     "'show me jobs that match me' or 'what should I apply to this week?'.",
   inputSchema,
