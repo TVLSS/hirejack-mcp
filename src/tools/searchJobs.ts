@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl, ApiError } from "../lib/api.js";
-import { toolResult, toolError } from "../lib/format.js";
+import { toolResult, toolError, envelopeSchema } from "../lib/format.js";
+import { jobSlimSchema } from "../lib/outputShapes.js";
 import type { Tool } from "../registry.js";
 
 const FAMILIES = [
@@ -195,6 +196,15 @@ export const searchJobsTool: Tool = {
     "company-level questions (`get_company_profile`), personalized ranking " +
     "(`recommendations`), or aggregate market stats (`get_market_pulse`).",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        jobs: z.array(jobSlimSchema).describe("Matching jobs, newest first"),
+        count: z.number().describe("Jobs in this page (not the corpus total)"),
+      })
+      .passthrough(),
+    "Search results page; meta.next_cursor is present when more pages exist",
+  ),
   handler: async (args: Args) => {
     try {
       const limit = args.limit ?? 25;

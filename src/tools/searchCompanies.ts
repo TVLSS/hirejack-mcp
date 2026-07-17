@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl, ApiError } from "../lib/api.js";
-import { toolResult, toolError } from "../lib/format.js";
+import { toolResult, toolError, envelopeSchema } from "../lib/format.js";
+import { companySlimSchema } from "../lib/outputShapes.js";
 import type { Tool } from "../registry.js";
 
 const inputSchema = z.object({
@@ -56,6 +57,15 @@ export const searchCompaniesTool: Tool = {
     "(`get_company_profile`) or multi-axis segmentation by trend/skill/" +
     "job-count (`find_companies`, Analyst).",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        companies: z.array(companySlimSchema).describe("Sorted by total open jobs descending"),
+        count: z.number(),
+      })
+      .passthrough(),
+    "Slim company records; meta.fetchedAt stamps the embedded snapshot",
+  ),
   handler: async ({ q, industry, limit }: Args) => {
     try {
       const cap = Math.min(limit ?? 50, 200);

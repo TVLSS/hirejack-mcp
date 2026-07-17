@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl, ApiError } from "../lib/api.js";
-import { toolResult, toolError } from "../lib/format.js";
+import { toolResult, toolError, envelopeSchema } from "../lib/format.js";
+import { marketPulseSchema } from "../lib/outputShapes.js";
 import type { Tool } from "../registry.js";
 
 // Non-strict like every other tool: unknown keys are ignored rather than
@@ -24,6 +25,7 @@ export const getMarketPulseTool: Tool = {
     "now?' or 'what skills are trending?'. Not for history or time-series " +
     "(`get_market_history`, Analyst) or job-level search (`search_jobs`).",
   inputSchema,
+  outputSchema: envelopeSchema(marketPulseSchema, "Daily market snapshot; meta.fetchedAt is its build timestamp"),
   handler: async (_args: Args) => {
     try {
       const stats = await apiGet<Stats>("/stats");

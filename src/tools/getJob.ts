@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl, ApiError } from "../lib/api.js";
-import { toolResult, toolError } from "../lib/format.js";
+import { toolResult, toolError, envelopeSchema } from "../lib/format.js";
+import { jobSlimSchema } from "../lib/outputShapes.js";
 import type { Tool } from "../registry.js";
 
 // `get_job` is the pair to `search_jobs`: when the caller already knows which
@@ -77,6 +78,10 @@ export const getJobTool: Tool = {
     "browsing or filtering postings (`search_jobs`) or personal fit " +
     "scoring (`match_job`).",
   inputSchema,
+  outputSchema: envelopeSchema(
+    jobSlimSchema,
+    "The job posting (metadata only — description HTML is intentionally omitted; meta.gated marks postings the website would paywall)",
+  ),
   handler: async (args: Args) => {
     let domain = args.domain;
     let jobId = args.jobId;

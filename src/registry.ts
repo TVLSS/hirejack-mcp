@@ -40,6 +40,10 @@ export type ToolContent = {
 
 export type ToolResponse = {
   content: ToolContent[];
+  /** Machine-readable copy of the payload (same envelope the text content
+   *  stringifies). For tools that declare an outputSchema, successful results
+   *  MUST include this per the MCP spec; toolResult() attaches it uniformly. */
+  structuredContent?: Record<string, unknown>;
   isError?: boolean;
 };
 
@@ -63,6 +67,9 @@ export type Tool = {
   name: string;
   description: string;
   inputSchema: z.ZodTypeAny;
+  /** Optional result schema, serialized to JSON Schema in tools/list. Keep
+   *  these permissive (optional fields + passthrough objects). */
+  outputSchema?: z.ZodTypeAny;
   handler: (args: any, ctx: ToolContext) => Promise<ToolResponse>;
   /** Per-tool annotation overrides. Defaults (readOnlyHint: true) fit the
    *  query tools; the account-action tools (save_job, watch_company,
@@ -142,6 +149,14 @@ export function listTools() {
       $refStrategy: "none",
       target: "openApi3",
     }),
+    ...(t.outputSchema
+      ? {
+          outputSchema: zodToJsonSchema(t.outputSchema, {
+            $refStrategy: "none",
+            target: "openApi3",
+          }),
+        }
+      : {}),
     annotations: {
       title: titleFromName(t.name),
       readOnlyHint: t.annotations?.readOnlyHint ?? true,
@@ -193,7 +208,7 @@ export async function callTool(
 export const SERVER_INFO = {
   name: "hirejack",
   title: "HireJack",
-  version: "0.3.3", // keep in lockstep with package.json + server.json on each release
+  version: "0.3.4", // keep in lockstep with package.json + server.json on each release
   icons: [
     {
       src: "https://hirejack.com/apple-touch-icon.png",

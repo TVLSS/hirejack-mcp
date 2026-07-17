@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl, ApiError } from "../lib/api.js";
-import { toolResult, toolError } from "../lib/format.js";
+import { toolResult, toolError, envelopeSchema } from "../lib/format.js";
+import { companyProfileSchema } from "../lib/outputShapes.js";
 import type { Tool } from "../registry.js";
 
 const inputSchema = z.object({
@@ -33,6 +34,7 @@ export const getCompanyProfileTool: Tool = {
     "trends (`get_company_history`, Analyst) or the user's personal fit " +
     "(`company_fit`).",
   inputSchema,
+  outputSchema: envelopeSchema(companyProfileSchema),
   handler: async ({ domain }: Args) => {
     try {
       const profile = await apiGet<CompanyProfile>(
