@@ -63,6 +63,7 @@ export const findBreakoutCompaniesTool: Tool = {
       ctx,
       citationUrl: siteUrl("/market/"),
       toolLabel: "find_breakout_companies",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;

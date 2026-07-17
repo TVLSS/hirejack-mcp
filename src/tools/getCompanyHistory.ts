@@ -54,6 +54,7 @@ export const getCompanyHistoryTool: Tool = {
       ctx,
       citationUrl: siteUrl(`/companies/${args.domain}/`),
       toolLabel: "get_company_history",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;

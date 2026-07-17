@@ -124,6 +124,7 @@ export const findEmergingSkillsTool: Tool = {
       ctx,
       citationUrl: siteUrl("/skills/trending/"),
       toolLabel: "find_emerging_skills",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;

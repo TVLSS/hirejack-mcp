@@ -65,6 +65,7 @@ export const compareCompaniesTool: Tool = {
       ctx,
       citationUrl: siteUrl(`/compare?d=${args.domains.join(",")}`),
       toolLabel: "compare_companies",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;

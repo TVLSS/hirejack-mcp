@@ -97,6 +97,7 @@ export const findCompaniesTool: Tool = {
       ctx,
       citationUrl: siteUrl("/companies.html"),
       toolLabel: "find_companies",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;

@@ -107,6 +107,7 @@ export const getMarketHistoryTool: Tool = {
       ctx,
       citationUrl: siteUrl("/market/"),
       toolLabel: "get_market_history",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;

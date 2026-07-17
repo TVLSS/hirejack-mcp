@@ -121,6 +121,7 @@ export const findEmergingRolesTool: Tool = {
       ctx,
       citationUrl: siteUrl("/roles/emerging/"),
       toolLabel: "find_emerging_roles",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;

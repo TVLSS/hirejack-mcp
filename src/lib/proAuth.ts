@@ -18,6 +18,8 @@ export type ProToolDeps = {
   toolLabel: string;
   /** True when the tool is Premium-only (helps with the upgrade hint). */
   premium?: boolean;
+  /** True when the tool requires the standalone Analyst tier. */
+  analyst?: boolean;
   /** Tool needs only an authenticated account, not a paid tier (account-action tools). */
   anyTier?: boolean;
 };
@@ -26,7 +28,7 @@ export function requireUser(deps: ProToolDeps): { error: ToolResponse } | { toke
   // In stdio (this package), ctx.userId is always absent.
   // Pro+/Analyst tools require the hosted OAuth endpoint.
   if (!deps.ctx.userId) {
-    const tier = deps.anyTier ? "" : deps.premium ? " Premium" : " Pro or Premium";
+    const tier = deps.anyTier ? "" : deps.analyst ? " Analyst" : deps.premium ? " Premium" : " Pro or Premium";
     return {
       error: toolError(
         `${deps.toolLabel} requires an authenticated HireJack${tier} account. ` +
@@ -54,9 +56,9 @@ export function handleApiError(err: unknown, deps: ProToolDeps): ToolResponse {
       );
     }
     if (err.status === 403) {
-      const tier = deps.premium ? "Premium" : "Pro";
+      const tier = deps.analyst ? "Analyst" : deps.premium ? "Premium" : "Pro";
       return toolError(
-        `${deps.toolLabel}: HireJack ${tier} tier required. Upgrade at https://hirejack.com/pricing.html.`,
+        `${deps.toolLabel}: HireJack ${tier} tier required. ${deps.analyst ? "See https://hirejack.com/analyst/ (free for working journalists)." : "Upgrade at https://hirejack.com/pricing.html."}`,
       );
     }
     if (err.status === 404) {

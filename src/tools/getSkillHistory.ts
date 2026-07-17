@@ -63,6 +63,7 @@ export const getSkillHistoryTool: Tool = {
       ctx,
       citationUrl: siteUrl("/skills/trending/"),
       toolLabel: "get_skill_history",
+      analyst: true,
     };
     const auth = requireUser(deps);
     if ("error" in auth) return auth.error;
