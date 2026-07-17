@@ -9,13 +9,14 @@ export const watchlistIntelligenceTool: Tool = {
   name: "watchlist_intelligence",
   description:
     "Aggregate hiring intelligence on every company the authenticated user " +
-    "is watching. Pro tier. For each watched company returns: " +
+    "is watching. " + "Pro tier." + " For each watched company returns: " +
     "totalJobs currently open, hiringTrend (up/down/stable), trendPct " +
     "(week-over-week %), topSkills the company is hiring for, medianSalary, " +
     "sparkline data (last ~12 weeks of job counts), and jobDelta since the " +
     "previous snapshot. Use for queries like 'what's happening at the " +
     "companies I'm watching?' or 'which of my watched companies are scaling " +
-    "up right now?'.",
+    "up right now?'. Not for a plain list of watched companies — use " +
+    "`list_watchlist` for that.",
   inputSchema,
   handler: async (_args, ctx) => {
     const deps = {

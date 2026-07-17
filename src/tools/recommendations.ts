@@ -11,7 +11,7 @@ const inputSchema = z.object({
     .min(1)
     .max(50)
     .optional()
-    .describe("Max recommendations to return (default 10, max 50)"),
+    .describe("Max recommendations to return (1-50, default 10)"),
 });
 
 type RecJob = {
@@ -40,9 +40,11 @@ export const recommendationsTool: Tool = {
     "Get top job recommendations for the authenticated user, scored against " +
     "their profile (skills, desired roles, seniority, location, remote " +
     "preference) and hard-filtered by their remote/US-only/minimum-salary " +
-    "preferences. Pro tier. Returns jobs ranked by composite match score " +
+    "preferences. " + "Pro tier." + " Returns jobs ranked by composite match score " +
     "with per-job match details (default 10, `limit` up to 50). Use for " +
-    "'show me jobs that match me' or 'what should I apply to this week?'.",
+    "'show me jobs that match me' or 'what should I apply to this week?'. " +
+    "Not for unpersonalized filter searches (`search_jobs`) or scoring one " +
+    "known job (`match_job`).",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

@@ -61,7 +61,8 @@ export const getProfileTool: Tool = {
     "minimum salary) that hard-filter their recommendations, For You feed, " +
     "and email alerts. Call this before explaining match results or " +
     "recommendations — a minimum-salary floor or remote-only preference " +
-    "changes what the user sees. Companion write tool: `update_preferences`.",
+    "changes what the user sees. Not for changing preferences — use the " +
+    "companion write tool `update_preferences` for that.",
   inputSchema: z.object({}),
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: async (_args, ctx) => {
@@ -141,7 +142,8 @@ export const updatePreferencesTool: Tool = {
     "recommendations, weekly digest, and daily job alerts — same effect as " +
     "editing Settings on the website. Returns the full updated preference " +
     "set. Use for 'raise my minimum salary to $150K', 'only show me remote " +
-    "US jobs', 'set my target level to staff'.",
+    "US jobs', 'set my target level to staff'. Not for reading current " +
+    "settings — use `get_profile` for that.",
   inputSchema: updateSchema,
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: UpdateArgs, ctx) => {

@@ -48,8 +48,16 @@ const inputSchema = z.object({
   family: z
     .enum(FAMILIES)
     .optional()
-    .describe("Role family (software_engineering, machine_learning, etc.)"),
-  seniority: z.enum(SENIORITIES).optional().describe("Seniority level"),
+    .describe(
+      "Role family (software_engineering, machine_learning, etc.). Omit to " +
+        "search all families.",
+    ),
+  seniority: z
+    .enum(SENIORITIES)
+    .optional()
+    .describe(
+      "Seniority level on the intern → vp ladder. Omit to include all levels.",
+    ),
   skill: z
     .string()
     .optional()
@@ -66,7 +74,13 @@ const inputSchema = z.object({
     .describe(
       "Location substring filter, e.g. 'San Francisco' or 'New York'",
     ),
-  remote: z.enum(REMOTE_MODES).optional().describe("Remote policy filter"),
+  remote: z
+    .enum(REMOTE_MODES)
+    .optional()
+    .describe(
+      "Remote policy filter; 'remote+hybrid' matches either mode. Omit to " +
+        "include onsite jobs too.",
+    ),
   posted_since: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format")
@@ -95,11 +109,18 @@ const inputSchema = z.object({
   has_salary: z
     .boolean()
     .optional()
-    .describe("Only include jobs with disclosed salary"),
+    .describe(
+      "Set true to only include jobs with a disclosed salary range; omit " +
+        "to include jobs without pay data.",
+    ),
   visa: z
     .enum(VISA_VALUES)
     .optional()
-    .describe("Visa sponsorship: 'yes' or 'no'"),
+    .describe(
+      "Visa sponsorship (AI-extracted): 'yes' returns jobs whose posting " +
+        "indicates sponsorship, 'no' those that rule it out. Omit to include " +
+        "jobs where the posting doesn't say.",
+    ),
   education: z
     .enum(["none", "associate", "bachelor", "master", "phd"])
     .optional()
@@ -170,7 +191,9 @@ export const searchJobsTool: Tool = {
     "company, location, salary range, posted date, and key skills. Use " +
     "this for queries like 'remote senior backend roles paying $200K+', " +
     "'data engineer jobs at fintech companies', 'who is hiring Rust " +
-    "developers in NYC'.",
+    "developers in NYC'. Not for a single known posting (`get_job`), " +
+    "company-level questions (`get_company_profile`), personalized ranking " +
+    "(`recommendations`), or aggregate market stats (`get_market_pulse`).",
   inputSchema,
   handler: async (args: Args) => {
     try {

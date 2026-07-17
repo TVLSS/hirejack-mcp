@@ -10,11 +10,12 @@ const inputSchema = z.object({
 export const companyFitTool: Tool = {
   name: "company_fit",
   description:
-    "Score how well the authenticated user fits a company. Pro tier. " +
+    "Score how well the authenticated user fits a company. " + "Pro tier." + " " +
     "Returns fitScore (0-100), 5-dimension breakdown (tech stack 40%, roles " +
     "25%, seniority 15%, location 10%, hiring trend 10%), matching skills, " +
     "skill gaps, role alignment, and a hiring-momentum signal. Use for 'is " +
-    "Anthropic a good fit for me?' or 'compare these companies for me'.",
+    "Anthropic a good fit for me?' or 'compare these companies for me'. " +
+    "Not for scoring a specific job posting — use `match_job` for that.",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

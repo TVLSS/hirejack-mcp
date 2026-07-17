@@ -55,10 +55,12 @@ export const salaryBenchmarkTool: Tool = {
   name: "salary_benchmark",
   description:
     "Compare a salary against the live HireJack market for a role family + " +
-    "seniority slice. Pro tier. Returns precomputed P10/P25/P50/P75/P90 " +
+    "seniority slice. " + "Pro tier." + " Returns precomputed P10/P25/P50/P75/P90 " +
     "percentiles, the user's percentile ranking (when `salary` is supplied), " +
     "and a career-ladder progression of medians by seniority. Use for 'am I " +
-    "paid well as a senior backend engineer?' or 'what should I ask for?'.",
+    "paid well as a senior backend engineer?' or 'what should I ask for?'. " +
+    "Not for a specific job's posted range (`get_job`) or market-wide comp " +
+    "stats (`get_market_pulse`).",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

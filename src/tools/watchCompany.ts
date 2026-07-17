@@ -28,7 +28,8 @@ export const watchCompanyTool: Tool = {
     "`watchlist_intelligence`, daily job alerts, and the weekly digest. " +
     "Idempotent — following an already-watched company is a no-op. Use when " +
     "the user says 'watch this company', 'follow Stripe for me', or 'stop " +
-    "watching them'.",
+    "watching them'. Not for saving individual job postings — use " +
+    "`save_job` for that.",
   inputSchema,
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: Args, ctx) => {

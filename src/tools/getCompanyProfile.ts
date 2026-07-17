@@ -29,7 +29,9 @@ export const getCompanyProfileTool: Tool = {
     "seniority breakdown, location breakdown, hiring trend (% MoM), " +
     "salary medians where disclosed, and an AI-generated hiring brief. " +
     "Use this for queries like 'what is Stripe hiring?', 'what tech does " +
-    "Anthropic use?', or before comparing companies.",
+    "Anthropic use?', or before comparing companies. Not for historical " +
+    "trends (`get_company_history`, Analyst) or the user's personal fit " +
+    "(`company_fit`).",
   inputSchema,
   handler: async ({ domain }: Args) => {
     try {

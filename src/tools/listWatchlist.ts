@@ -21,7 +21,7 @@ const inputSchema = z.object({
     .min(1)
     .max(100)
     .optional()
-    .describe("Max companies to return (default 50)."),
+    .describe("Max companies to return (1-100, default 50)."),
 });
 
 type Args = z.infer<typeof inputSchema>;
@@ -33,8 +33,8 @@ export const listWatchlistTool: Tool = {
     "the read companion to `watch_company`. Returns company name, domain " +
     "(reusable with get_company_profile/company_fit/watch_company), and " +
     "follow date. Use for 'what companies am I watching?' or before " +
-    "adding/removing one. For hiring trends and stats per watched company, " +
-    "use `watchlist_intelligence` (Pro).",
+    "adding/removing one. Not for per-company hiring trends and stats — " +
+    "use `watchlist_intelligence` (Pro) for that.",
   inputSchema,
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: async (args: Args, ctx) => {

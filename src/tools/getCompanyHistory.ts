@@ -21,12 +21,14 @@ const inputSchema = z.object({
 export const getCompanyHistoryTool: Tool = {
   name: "get_company_history",
   description:
-    "Time-series of a company's hiring profile. Pro+ tier. Returns monthly " +
+    "Time-series of a company's hiring profile. " + "Analyst tier." + " Returns monthly " +
     "snapshots (totalJobs, engineeringJobs, medianSalary, hiringTrend, " +
     "trendPct, top skills, seniority + family distribution) plus the wider " +
     "monthlyPostings job-count series and current-state summary. Use for " +
     "'how has Anthropic's hiring changed since January?' or 'is Stripe " +
-    "growing or shrinking?'.",
+    "growing or shrinking?'. Not for a current-state snapshot " +
+    "(`get_company_profile`) or side-by-side comparison " +
+    "(`compare_companies`).",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

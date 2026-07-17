@@ -59,7 +59,8 @@ export const trackApplicationTool: Tool = {
     "phone_screen → interview → offer / rejected / withdrawn), attach " +
     "notes, or un-track it with remove=true. Powers the Kanban pipeline at " +
     "hirejack.com/saved.html. Use when the user says 'I applied to this', " +
-    "'move Stripe to interview', or 'log that I got an offer'.",
+    "'move Stripe to interview', or 'log that I got an offer'. Not for " +
+    "mere bookmarking without applying — use `save_job` for that.",
   inputSchema,
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: Args, ctx) => {

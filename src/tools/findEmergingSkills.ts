@@ -46,20 +46,22 @@ const inputSchema = z.object({
       "Maximum companies at the START of the window (default 8). Enforces the " +
         "'started obscure' criterion so already-established skills don't qualify.",
     ),
-  limit: z.coerce.number().int().min(1).max(50).optional().describe("Max skills to return (default 20)"),
+  limit: z.coerce.number().int().min(1).max(50).optional().describe("Max skills to return (1-50, default 20)"),
 });
 
 export const findEmergingSkillsTool: Tool = {
   name: "find_emerging_skills",
   description:
     "Skills with low-but-consistently-growing market adoption — early-stage signals. " +
-    "Analyst tier. Tracks companyCount across the last 3 monthly snapshots and " +
+    "" + "Analyst tier." + " Tracks companyCount across the last 3 monthly snapshots and " +
     "surfaces skills that climbed consistently (non-decreasing) from a low base, " +
     "with a meaningful absolute company-count gain — not just a big percentage on a " +
     "tiny base. Use for 'what skills are quietly trending?' or 'what should I learn " +
     "before everyone else?'. Defaults: adoptionMin 5, adoptionMax 25, growthMin 30%, " +
     "minDelta 4, baseMax 8, limit 20. Returns a deliberately tight list; loosen " +
-    "minDelta / baseMax / growthMin to widen it.",
+    "minDelta / baseMax / growthMin to widen it. Not for trend lines on an " +
+    "established, named skill (`get_skill_history`) or role-level emergence " +
+    "(`find_emerging_roles`).",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

@@ -31,7 +31,7 @@ const inputSchema = z.object({
     .min(1)
     .max(100)
     .optional()
-    .describe("Max entries to return (default 50, newest first)."),
+    .describe("Max entries to return (1-100, default 50, newest first)."),
 });
 
 type Args = z.infer<typeof inputSchema>;
@@ -87,7 +87,8 @@ export const listSavedJobsTool: Tool = {
     "the read companion to `save_job`. Returns title, company, ids (reusable " +
     "with get_job/match_job/save_job), and flags for postings that have since " +
     "closed. Use when the user asks 'what jobs have I saved?' or wants to " +
-    "review/prune their shortlist.",
+    "review/prune their shortlist. Not for application-pipeline status — " +
+    "use `list_applications` for that.",
   inputSchema,
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: (args: Args, ctx) => listEndpoint("/saved-jobs", "list_saved_jobs", args, ctx),
@@ -100,7 +101,8 @@ export const listApplicationsTool: Tool = {
     "pipeline stage (applied / phone_screen / interview / offer / rejected / " +
     "withdrawn), newest first — the read companion to `track_application`. " +
     "Use when the user asks 'what's in my pipeline?', 'where did I apply?', " +
-    "or before moving an application to a new stage.",
+    "or before moving an application to a new stage. Not for the saved/" +
+    "bookmarked list — use `list_saved_jobs` for that.",
   inputSchema,
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: (args: Args, ctx) => listEndpoint("/applied", "list_applications", args, ctx),

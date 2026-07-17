@@ -16,18 +16,19 @@ const inputSchema = z.object({
     .min(0)
     .optional()
     .describe("Minimum total open jobs to be considered (default 20, filters out tiny companies)"),
-  limit: z.coerce.number().int().min(1).max(50).optional().describe("Max companies to return (default 20)"),
+  limit: z.coerce.number().int().min(1).max(50).optional().describe("Max companies to return (1-50, default 20)"),
 });
 
 export const findBreakoutCompaniesTool: Tool = {
   name: "find_breakout_companies",
   description:
-    "Companies with extreme hiring growth right now. Analyst tier. Returns " +
+    "Companies with extreme hiring growth right now. " + "Analyst tier." + " Returns " +
     "companies whose computed trendPct exceeds the threshold (50% by " +
     "default), sorted by growth descending, with their recent monthly job " +
     "counts. Use for 'who's scaling fastest right now?' or 'find companies " +
     "doubling their hiring'. Useful for investors and recruiters tracking " +
-    "momentum.",
+    "momentum. Not for custom-axis segmentation by industry/family/skill — " +
+    "use `find_companies` for that.",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

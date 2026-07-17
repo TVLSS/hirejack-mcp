@@ -73,7 +73,9 @@ export const getJobTool: Tool = {
     "Returns title, company, location, salary, skills, seniority, posted " +
     "date, visa/remote/education metadata, and (when available) the AI " +
     "summary. Use after `search_jobs` when the user picks a specific role " +
-    "to discuss, or when the user pastes a HireJack job URL.",
+    "to discuss, or when the user pastes a HireJack job URL. Not for " +
+    "browsing or filtering postings (`search_jobs`) or personal fit " +
+    "scoring (`match_job`).",
   inputSchema,
   handler: async (args: Args) => {
     let domain = args.domain;

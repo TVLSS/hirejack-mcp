@@ -17,16 +17,21 @@ const inputSchema = z.object({
     .min(1)
     .max(24)
     .optional()
-    .describe("Months of history (default 12, max 24)"),
+    .describe(
+      "Months of history to return (1-24, default 12). Monthly snapshots " +
+        "began March 2026, so depth is capped by available history.",
+    ),
 });
 
 export const getSkillHistoryTool: Tool = {
   name: "get_skill_history",
   description:
-    "Time-series of a skill's market adoption. Pro+ tier. Returns monthly " +
+    "Time-series of a skill's market adoption. " + "Analyst tier." + " Returns monthly " +
     "companyCount + jobMentions for the skill, top companies hiring for it " +
     "each month, and computed MoM deltas. Use for 'how fast is Rust " +
-    "adoption growing?' or 'is React still dominant?'.",
+    "adoption growing?' or 'is React still dominant?'. Not for discovering " +
+    "early-stage skills you can't yet name — use `find_emerging_skills` " +
+    "for that.",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

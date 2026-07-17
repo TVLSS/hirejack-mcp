@@ -44,7 +44,9 @@ export const saveJobTool: Tool = {
     "remove it with action='unsave'). Saved jobs appear at " +
     "hirejack.com/saved.html and feed batch match scoring. Idempotent — " +
     "saving an already-saved job is a no-op. Use when the user says 'save " +
-    "this one', 'bookmark these three', or 'remove that from my saved jobs'.",
+    "this one', 'bookmark these three', or 'remove that from my saved " +
+    "jobs'. Not for tracking an actual application (`track_application`) " +
+    "or following companies (`watch_company`).",
   inputSchema,
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: Args, ctx) => {

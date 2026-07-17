@@ -8,13 +8,15 @@ const inputSchema = z.object({});
 export const marketPositionTool: Tool = {
   name: "market_position",
   description:
-    "Compute the authenticated user's market position score (0-100). Pro tier. " +
+    "Compute the authenticated user's market position score (0-100). " + "Pro tier." + " " +
     "Weighted: 50% skill demand against current market, 20% seniority fit, " +
     "15% remote availability for the user's preference, 15% skill breadth. " +
     "Returns score, matchingJobs count, salaryMedian for matching roles, " +
     "per-skill demand breakdown, and the top companies whose tech stacks " +
     "align best with the user's skills. Use for queries like 'how do I " +
-    "stack up against the market?' or 'what's my market position right now?'.",
+    "stack up against the market?' or 'what's my market position right " +
+    "now?'. Not for job-specific (`match_job`) or company-specific " +
+    "(`company_fit`) scores.",
   inputSchema,
   handler: async (_args, ctx) => {
     const deps = {

@@ -18,14 +18,20 @@ const inputSchema = z.object({
     .min(1)
     .max(90)
     .optional()
-    .describe("Days of daily history (default 30, max 90; only used when range=daily)"),
+    .describe(
+      "Days of daily history (1-90, default 30). Only used when " +
+        "range='daily'; ignored for range='monthly'.",
+    ),
   months: z.coerce
     .number()
     .int()
     .min(1)
     .max(24)
     .optional()
-    .describe("Months of monthly history (default 12; only used when range=monthly)"),
+    .describe(
+      "Months of monthly history (1-24, default 12). Only used when " +
+        "range='monthly'; ignored for range='daily'.",
+    ),
   detail: z
     .enum(["compact", "full"])
     .optional()
@@ -43,10 +49,11 @@ export const getMarketHistoryTool: Tool = {
   name: "get_market_history",
   description:
     "Time-series of market-wide hiring stats: total jobs, remote share, " +
-    "compensation, seniority + family distribution, top skills. Analyst tier. " +
+    "compensation, seniority + family distribution, top skills. " + "Analyst tier." + " " +
     "Daily resolution back to early March 2026; monthly resolution from " +
     "March 2026. Use for 'how has the market shifted in 2026?' or 'is " +
-    "remote hiring trending up?'.",
+    "remote hiring trending up?'. Not for the current snapshot — use " +
+    "`get_market_pulse` for that.",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

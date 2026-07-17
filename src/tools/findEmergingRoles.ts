@@ -38,22 +38,22 @@ const inputSchema = z.object({
     .min(0)
     .optional()
     .describe("Minimum growth percentage over the window (default 25)."),
-  limit: z.coerce.number().int().min(1).max(50).optional().describe("Max roles to return (default 20)"),
+  limit: z.coerce.number().int().min(1).max(50).optional().describe("Max roles to return (1-50, default 20)"),
 });
 
 export const findEmergingRolesTool: Tool = {
   name: "find_emerging_roles",
   description:
     "Job roles gaining company adoption — which titles are spreading across " +
-    "the market. Analyst tier. Compares each canonical role's " +
+    "the market. " + "Analyst tier." + " Compares each canonical role's " +
     "company count today against a daily rollup snapshot windowDays ago " +
     "(default 21) and returns roles that cleared the growth thresholds, " +
     "plus genuinely NEW titles the classifier just started seeing (how " +
     "'Forward Deployed Engineer' was first caught). Use for 'what roles " +
     "are companies suddenly hiring for?' or 'is the AI-engineer title " +
     "spreading?'. Defaults: windowDays 21, minCompanies 5, minDelta 2, " +
-    "growthMin 25%, limit 20. Companion: find_emerging_skills for the " +
-    "skill-level signal.",
+    "growthMin 25%, limit 20. Not for skill-level signals — use the " +
+    "companion `find_emerging_skills` for those.",
   inputSchema,
   handler: async (args, ctx) => {
     const deps = {

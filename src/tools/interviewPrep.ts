@@ -36,9 +36,10 @@ export const interviewPrepTool: Tool = {
     "Generate targeted interview prep for a specific job: 5 key topics " +
     "(deep vs surface depth based on job seniority), 5 likely questions by " +
     "type (technical, behavioral, system design) with answer tips, and 3 " +
-    "company-specific research items. Premium tier. Uses job description + " +
+    "company-specific research items. " + "Premium tier." + " Uses job description + " +
     "company tech stack + user skills as context. Use for 'help me prep for " +
-    "my Anthropic interview' or 'what should I expect in this loop?'.",
+    "my Anthropic interview' or 'what should I expect in this loop?'. Not " +
+    "for resume tailoring — use `resume_rewrite` for that.",
   inputSchema,
   handler: async (args, ctx) => {
     const ref = resolveJobRef(args);

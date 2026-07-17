@@ -9,13 +9,15 @@ export const skillImpactTool: Tool = {
   name: "skill_impact",
   description:
     "For each skill the authenticated user does NOT have, simulate adding it " +
-    "and compute the market impact. Pro tier. Returns a ranked list of " +
+    "and compute the market impact. " + "Pro tier." + " Returns a ranked list of " +
     "skills with: newJobsUnlocked (jobs that previously didn't match but " +
     "would after learning the skill), boostedJobs (existing matches that " +
     "would score higher), companiesNeedingIt, relevantRoles, and a composite " +
     "impactScore. Also returns profileCompleteness so the caller can suggest " +
     "filling missing profile fields. Use for queries like 'what should I " +
-    "learn next?' or 'which skill would unlock the most jobs for me?'.",
+    "learn next?' or 'which skill would unlock the most jobs for me?'. Not " +
+    "for auditing the user's CURRENT skills against their target roles — " +
+    "use `skill_gap` for that.",
   inputSchema,
   handler: async (_args, ctx) => {
     const deps = {

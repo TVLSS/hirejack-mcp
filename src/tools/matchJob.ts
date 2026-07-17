@@ -35,14 +35,15 @@ const inputSchema = z
 export const matchJobTool: Tool = {
   name: "match_job",
   description:
-    "Score how well the authenticated user matches a specific job. Pro tier. " +
+    "Score how well the authenticated user matches a specific job. " + "Pro tier." + " " +
     "Returns matchPct (0-100), a dimension breakdown (skills, role, " +
     "seniority, location, remote — plus experience when both the user's " +
     "resume-derived years and the job's required years are known), " +
     "matched/missing/bonus skill lists, an experienceFit comparison, " +
     "ATS-specific resume tips for the company's ATS, and a priorityScore " +
     "that factors hiring velocity. Use for queries like 'how well do I " +
-    "match this job?' or 'should I apply?'.",
+    "match this job?' or 'should I apply?'. Not for company-level fit " +
+    "(`company_fit`) or discovering new jobs (`recommendations`).",
   inputSchema,
   handler: async (args, ctx) => {
     const ref = resolveJobRef(args);

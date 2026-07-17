@@ -21,7 +21,8 @@ export const getMarketPulseTool: Tool = {
     "companies, remote share, top skills by demand, top companies by " +
     "hiring volume, and trending skills (week-over-week movers). Use for " +
     "high-level market questions like 'how is the tech job market right " +
-    "now?' or 'what skills are trending?'.",
+    "now?' or 'what skills are trending?'. Not for history or time-series " +
+    "(`get_market_history`, Analyst) or job-level search (`search_jobs`).",
   inputSchema,
   handler: async (_args: Args) => {
     try {

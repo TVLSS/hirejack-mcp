@@ -24,7 +24,7 @@ const inputSchema = z.object({
     .min(1)
     .max(200)
     .optional()
-    .describe("Max companies to return (default 50)"),
+    .describe("Max companies to return (1-200, default 50)"),
 });
 
 type Args = z.infer<typeof inputSchema>;
@@ -52,7 +52,9 @@ export const searchCompaniesTool: Tool = {
     "industry, total open jobs, and engineering job count. Use this to " +
     "find companies in a sector ('which fintech companies are hiring?') or " +
     "to resolve a company name to its domain before calling " +
-    "get_company_profile.",
+    "get_company_profile. Not for deep per-company data " +
+    "(`get_company_profile`) or multi-axis segmentation by trend/skill/" +
+    "job-count (`find_companies`, Analyst).",
   inputSchema,
   handler: async ({ q, industry, limit }: Args) => {
     try {
