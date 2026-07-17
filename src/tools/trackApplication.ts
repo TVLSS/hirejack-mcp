@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiPost } from "../lib/api.js";
-import { toolError } from "../lib/format.js";
+import { envelopeSchema, toolError } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import { jobCitationUrl, resolveCanonicalJob, resolveJobRef } from "../lib/jobRef.js";
 import type { Tool } from "../registry.js";
@@ -62,6 +62,19 @@ export const trackApplicationTool: Tool = {
     "'move Stripe to interview', or 'log that I got an offer'. Not for " +
     "mere bookmarking without applying — use `save_job` for that.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        applied: z.boolean().optional().describe("Whether the application is tracked after this call"),
+        stage: z.string().optional().describe("applied|phone_screen|interview|offer|rejected|withdrawn (write path only)"),
+        updated: z.boolean().optional().describe("True when an existing entry was updated rather than created (write path only)"),
+        changed: z.boolean().optional().describe("Remove path only; false when the job wasn't tracked (no-op, see meta.note)"),
+        title: z.string().optional(),
+        company: z.string().optional(),
+      })
+      .passthrough(),
+    "Result of the track/advance/remove action",
+  ),
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: Args, ctx) => {
     const ref = resolveJobRef(args);

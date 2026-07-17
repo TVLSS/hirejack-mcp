@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
-import { toolError } from "../lib/format.js";
+import { envelopeSchema, toolError } from "../lib/format.js";
 import { apiGetJobVariants, jobCitationUrl, resolveJobRef } from "../lib/jobRef.js";
 import type { Tool } from "../registry.js";
 
@@ -41,6 +41,31 @@ export const resumeRewriteTool: Tool = {
     "Stripe role' or 'tailor my bullets for this JD'. Not for interview " +
     "preparation — use `interview_prep` for that.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        overallTip: z.string().optional().describe("The single biggest improvement to make"),
+        bulletRewrites: z
+          .array(
+            z
+              .object({
+                original: z.string().optional().describe("The resume bullet to improve (quoted from the resume)"),
+                rewritten: z.string().optional().describe("Improved version incorporating the job's keywords"),
+                reason: z.string().optional(),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Up to 4 targeted bullet rewrites"),
+        missingKeywords: z.array(z.string()).optional().describe("Up to 5 JD keywords absent from the resume"),
+        formatTips: z.array(z.string()).optional().describe("Up to 2 structural suggestions"),
+        jobTitle: z.string().optional(),
+        companyName: z.string().optional(),
+        usedFreeCredit: z.boolean().optional().describe("Present (true) when a non-Premium user's one free rewrite credit was consumed"),
+      })
+      .passthrough(),
+    "AI resume rewrite suggestions targeted at one job posting",
+  ),
   handler: async (args, ctx) => {
     const ref = resolveJobRef(args);
     if ("error" in ref) return toolError(ref.error);

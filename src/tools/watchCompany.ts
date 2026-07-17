@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiGet, apiPost, siteUrl } from "../lib/api.js";
-import { toolError } from "../lib/format.js";
+import { envelopeSchema, toolError } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -31,6 +31,17 @@ export const watchCompanyTool: Tool = {
     "watching them'. Not for saving individual job postings — use " +
     "`save_job` for that.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        following: z.boolean().optional().describe("Whether the company is on the watchlist after this call"),
+        changed: z.boolean().optional().describe("False when the call was a no-op (already in the requested state; see meta.note)"),
+        domain: z.string().optional(),
+        company: z.string().optional().describe("Company display name (present on an actual follow/unfollow)"),
+      })
+      .passthrough(),
+    "Result of the follow/unfollow action",
+  ),
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: Args, ctx) => {
     const action = args.action ?? "follow";

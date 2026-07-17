@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { apiGet, siteUrl } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -55,6 +56,66 @@ export const findEmergingRolesTool: Tool = {
     "growthMin 25%, limit 20. Not for skill-level signals — use the " +
     "companion `find_emerging_skills` for those.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        window: z
+          .object({
+            from: z.string().optional().describe("Baseline snapshot date, YYYY-MM-DD"),
+            to: z.string().optional().describe("Latest snapshot date, YYYY-MM-DD"),
+            days: z.number().optional().describe("Actual span measured"),
+            requestedDays: z.number().optional(),
+          })
+          .passthrough()
+          .optional(),
+        thresholds: z
+          .object({
+            minCompanies: z.number().optional(),
+            minDelta: z.number().optional(),
+            growthMin: z.number().optional(),
+          })
+          .passthrough()
+          .optional()
+          .describe("Echo of the applied thresholds"),
+        growing: z
+          .array(
+            z
+              .object({
+                titleId: z.string().optional().describe("Canonical taxonomy role id"),
+                title: z.string().optional().describe("Canonical display title"),
+                family: z.string().optional().describe("Role family, e.g. 'software_engineering'"),
+                companiesNow: z.number().optional(),
+                companiesThen: z.number().optional().describe("Companies at the baseline snapshot"),
+                companiesDelta: z.number().optional(),
+                pctChange: z.number().nullable().optional().describe("Company growth %; null = role absent at baseline (new in window)"),
+                jobsNow: z.number().optional(),
+                jobsThen: z.number().optional(),
+                newInWindow: z.boolean().optional().describe("Present (true) when the role was absent at baseline"),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Roles clearing the growth thresholds, fastest % growth first"),
+        newTitles: z
+          .array(
+            z
+              .object({
+                titleId: z.string().optional(),
+                title: z.string().optional(),
+                family: z.string().optional(),
+                companies: z.number().optional(),
+                firstSeen: z.string().optional().describe("Date the classifier first saw the title"),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Genuinely new titles the classifier just started seeing"),
+        detectionsGeneratedAt: z.string().nullable().optional().describe("Timestamp of the pipeline's new-title detection run"),
+        note: z.string().optional().describe("Present when history is shorter than the requested window or data is unavailable"),
+      })
+      .passthrough(),
+    "Roles gaining company adoption plus genuinely new titles",
+  ),
   handler: async (args, ctx) => {
     const deps = {
       ctx,

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { apiGet, siteUrl } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -33,6 +34,30 @@ export const getSkillHistoryTool: Tool = {
     "early-stage skills you can't yet name — use `find_emerging_skills` " +
     "for that.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        skill: z.string().optional().describe("The skill as passed in"),
+        skillId: z.string().optional().describe("Resolved canonical skill id"),
+        snapshots: z
+          .array(
+            z
+              .object({
+                month: z.string().optional().describe("YYYY-MM"),
+                companyCount: z.number().optional().describe("Companies mentioning the skill that month"),
+                jobMentions: z.number().optional().describe("Job postings mentioning it"),
+                topCompanies: z.array(z.object({}).passthrough()).optional().describe("Top companies hiring for it (capped at 10)"),
+                companyCountDelta: z.number().optional().describe("MoM change in companyCount (absent on the first snapshot)"),
+                jobMentionsPctChange: z.number().nullable().optional().describe("MoM % change in jobMentions; null when the prior month had 0"),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Monthly adoption snapshots, oldest first"),
+      })
+      .passthrough(),
+    "Monthly market-adoption history for one skill",
+  ),
   handler: async (args, ctx) => {
     const deps = {
       ctx,

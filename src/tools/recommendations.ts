@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
+import { jobSlimSchema } from "../lib/outputShapes.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import { safeId } from "../lib/jobRef.js";
 import type { Tool } from "../registry.js";
@@ -46,6 +48,32 @@ export const recommendationsTool: Tool = {
     "Not for unpersonalized filter searches (`search_jobs`) or scoring one " +
     "known job (`match_job`).",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        jobs: z
+          .array(
+            jobSlimSchema.extend({
+              match: z
+                .object({
+                  skillMatches: z.array(z.string()).optional().describe("User skills the job mentions"),
+                  roleMatch: z.boolean().optional().describe("True when the job matches a desired role"),
+                  semantic: z.number().optional().describe("Resume-embedding similarity, 0-1"),
+                  score: z.number().optional().describe("Composite match score — divide by maxScore for a %"),
+                })
+                .passthrough()
+                .optional(),
+            }),
+          )
+          .optional()
+          .describe("Recommended jobs, best match first (slim search_jobs shape + per-job match details)"),
+        count: z.number().optional().describe("Jobs returned"),
+        maxScore: z.number().optional().describe("Best achievable composite score for this profile — normalizes each job's match.score"),
+        message: z.string().optional().describe("Present when the profile is missing skills or desired roles"),
+      })
+      .passthrough(),
+    "Personalized job recommendations for the authenticated user",
+  ),
   handler: async (args, ctx) => {
     const deps = {
       ctx,

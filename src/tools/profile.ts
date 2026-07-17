@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiGet, apiPut, siteUrl } from "../lib/api.js";
-import { toolError } from "../lib/format.js";
+import { envelopeSchema, toolError } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -53,6 +53,31 @@ function slimProfile(u: NonNullable<MeResponse["user"]>) {
   };
 }
 
+const profileSchema = z
+  .object({
+    name: z.string().nullable().optional(),
+    headline: z.string().nullable().optional(),
+    tier: z.string().optional().describe("'free' | 'pro' | 'premium' | 'analyst' | recruiter tiers"),
+    tier_expires_at: z.string().optional().describe("YYYY-MM-DD; absent for non-expiring tiers"),
+    skills: z.array(z.string()).optional().describe("Skill ids from codex/skills.json"),
+    desired_roles: z.array(z.string()).optional().describe("Canonical taxonomy titleIds"),
+    years_experience: z.number().optional().describe("Resume-derived years of experience, when known"),
+    onboarding_complete: z.boolean().optional(),
+    preferences: z
+      .object({
+        seniority: z.string().nullable().optional().describe("junior|mid|senior|staff|management, or null"),
+        location_city: z.string().nullable().optional(),
+        remote: z.string().optional().describe("'remote' | 'remote-us' | 'hybrid' | 'onsite' | 'any' — remote/remote-us HARD-filter matches"),
+        country: z.string().optional().describe("'US' hard-filters matches to US-available jobs; 'any' = no filter"),
+        min_salary_usd: z.number().nullable().optional().describe("Annual USD floor a match's listed range must clear; null = no minimum"),
+        require_salary_usd: z.boolean().optional().describe("When true, jobs without a listed USD salary can't match"),
+      })
+      .passthrough()
+      .optional()
+      .describe("These HARD-filter For You, recommendations, digest, and alerts"),
+  })
+  .passthrough();
+
 export const getProfileTool: Tool = {
   name: "get_profile",
   description:
@@ -64,6 +89,7 @@ export const getProfileTool: Tool = {
     "changes what the user sees. Not for changing preferences — use the " +
     "companion write tool `update_preferences` for that.",
   inputSchema: z.object({}),
+  outputSchema: envelopeSchema(profileSchema, "The authenticated user's profile and matching preferences"),
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: async (_args, ctx) => {
     const citationUrl = siteUrl("/settings.html");
@@ -145,6 +171,15 @@ export const updatePreferencesTool: Tool = {
     "US jobs', 'set my target level to staff'. Not for reading current " +
     "settings — use `get_profile` for that.",
   inputSchema: updateSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        updated: z.boolean().optional(),
+        profile: profileSchema.nullable().optional().describe("The full profile after the update (same shape as get_profile)"),
+      })
+      .passthrough(),
+    "Confirmation plus the updated profile",
+  ),
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: UpdateArgs, ctx) => {
     const citationUrl = siteUrl("/settings.html");

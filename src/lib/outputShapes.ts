@@ -74,6 +74,46 @@ export const companyProfileSchema = z
   .passthrough()
   .describe("Full hiring profile for one company; additional aggregate fields may be present");
 
+export const monthlyCountSchema = z
+  .object({
+    month: z.string().optional().describe("YYYY-MM"),
+    count: z.number().optional().describe("Job postings observed that month"),
+  })
+  .passthrough();
+
+export const skillShareSchema = z
+  .object({
+    name: z.string().optional(),
+    pct: z.number().optional().describe("Share of the company's postings mentioning the skill, 0-100"),
+  })
+  .passthrough();
+
+export const companyCurrentStateSchema = z
+  .object({
+    totalJobs: z.number().optional(),
+    medianSalary: z.number().nullable().optional().describe("Median disclosed salary (annual USD), when enough postings disclose pay"),
+    hiringTrend: z.string().optional().describe("'up' | 'down' | 'stable'"),
+    trendPct: z.number().optional().describe("Trend magnitude, % change"),
+  })
+  .passthrough()
+  .describe("Company's current hiring state");
+
+export const companyMonthlySnapshotSchema = z
+  .object({
+    month: z.string().optional().describe("YYYY-MM"),
+    totalJobs: z.number().optional(),
+    engineeringJobs: z.number().optional(),
+    medianSalary: z.number().nullable().optional().describe("Annual USD"),
+    jobsWithCompensation: z.number().optional().describe("get_company_history only"),
+    hiringTrend: z.string().optional().describe("'up' | 'down' | 'stable'"),
+    trendPct: z.number().optional().describe("Trend magnitude, % change"),
+    topSkills: z.array(z.object({}).passthrough()).optional().describe("Top 10 skills that month (get_company_history only)"),
+    seniorityDistribution: z.array(z.object({}).passthrough()).optional().describe("get_company_history only"),
+    familyDistribution: z.array(z.object({}).passthrough()).optional().describe("get_company_history only"),
+  })
+  .passthrough()
+  .describe("One monthly company snapshot (snapshots began March 2026); compare_companies returns a slimmer subset of these fields");
+
 export const marketPulseSchema = z
   .object({})
   .passthrough()

@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
+import { monthlyCountSchema } from "../lib/outputShapes.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -30,6 +32,32 @@ export const findBreakoutCompaniesTool: Tool = {
     "momentum. Not for custom-axis segmentation by industry/family/skill — " +
     "use `find_companies` for that.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        matched: z.number().optional().describe("Companies returned (post-threshold)"),
+        minPct: z.number().optional().describe("Applied growth threshold, %"),
+        minJobs: z.number().optional().describe("Applied minimum-jobs threshold"),
+        companies: z
+          .array(
+            z
+              .object({
+                domain: z.string().optional().describe("Pass to get_company_profile / get_company_history / company_fit"),
+                companyName: z.string().optional(),
+                industry: z.string().optional(),
+                totalJobs: z.number().optional(),
+                trendPct: z.number().optional().describe("Hiring growth, % (2-month rolling average)"),
+                hiringTrend: z.string().optional().describe("'up' | 'down' | 'stable'"),
+                recentMonths: z.array(monthlyCountSchema).optional().describe("Recent monthly job counts"),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Breakout companies, fastest growth first"),
+      })
+      .passthrough(),
+    "Companies whose hiring growth exceeds the threshold",
+  ),
   handler: async (args, ctx) => {
     const deps = {
       ctx,

@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { apiGet, siteUrl } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
+import { companyCurrentStateSchema, companyMonthlySnapshotSchema } from "../lib/outputShapes.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -35,6 +37,29 @@ export const compareCompaniesTool: Tool = {
     "company in depth (`get_company_profile`) or the user's personal fit " +
     "(`company_fit`).",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        months: z.number().optional().describe("Snapshot window requested"),
+        companies: z
+          .array(
+            z
+              .object({
+                domain: z.string().optional().describe("Pass to get_company_profile / get_company_history"),
+                companyName: z.string().optional(),
+                industry: z.string().optional(),
+                current: companyCurrentStateSchema.optional(),
+                topSkills: z.array(z.object({}).passthrough()).optional().describe("Capped at 5"),
+                snapshots: z.array(companyMonthlySnapshotSchema).optional().describe("Monthly snapshots (slim subset), oldest first"),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("One entry per requested domain, in request order"),
+      })
+      .passthrough(),
+    "Side-by-side hiring comparison of up to 5 companies",
+  ),
   handler: async (args, ctx) => {
     const deps = {
       ctx,

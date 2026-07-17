@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
-import { toolError } from "../lib/format.js";
+import { envelopeSchema, toolError } from "../lib/format.js";
 import { apiGetJobVariants, jobCitationUrl, resolveJobRef } from "../lib/jobRef.js";
 import type { Tool } from "../registry.js";
 
@@ -41,6 +41,51 @@ export const interviewPrepTool: Tool = {
     "my Anthropic interview' or 'what should I expect in this loop?'. Not " +
     "for resume tailoring — use `resume_rewrite` for that.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        keyTopics: z
+          .array(
+            z
+              .object({
+                topic: z.string().optional(),
+                why: z.string().optional(),
+                depth: z.string().optional().describe("'deep' (likely interview focus) | 'surface' (good to mention)"),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Up to 5 technical topics to study"),
+        likelyQuestions: z
+          .array(
+            z
+              .object({
+                question: z.string().optional(),
+                type: z.string().optional().describe("'technical' | 'behavioral' | 'system_design'"),
+                tip: z.string().optional().describe("One-sentence answering tip"),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Up to 5 likely interview questions"),
+        companyPrep: z
+          .array(
+            z
+              .object({
+                item: z.string().optional().describe("What to research"),
+                why: z.string().optional(),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Up to 3 company-specific research items"),
+        jobTitle: z.string().optional(),
+        companyName: z.string().optional(),
+        seniority: z.string().optional().describe("intern|junior|mid|senior|staff|principal|manager|director|vp"),
+      })
+      .passthrough(),
+    "AI interview preparation for one job posting",
+  ),
   handler: async (args, ctx) => {
     const ref = resolveJobRef(args);
     if ("error" in ref) return toolError(ref.error);

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { apiGet, siteUrl } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -36,6 +37,26 @@ export const listWatchlistTool: Tool = {
     "adding/removing one. Not for per-company hiring trends and stats — " +
     "use `watchlist_intelligence` (Pro) for that.",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        total: z.number().optional().describe("Total companies on the watchlist"),
+        returned: z.number().optional().describe("Companies in this response (after limit)"),
+        companies: z
+          .array(
+            z
+              .object({
+                company: z.string().optional().describe("Display name (falls back to the domain)"),
+                domain: z.string().optional().describe("Pass to get_company_profile / company_fit / watch_company"),
+                followed_at: z.string().optional().describe("YYYY-MM-DD"),
+              })
+              .passthrough(),
+          )
+          .optional(),
+      })
+      .passthrough(),
+    "Companies on the user's watchlist",
+  ),
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: async (args: Args, ctx) => {
     const citationUrl = siteUrl("/saved.html");

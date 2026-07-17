@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiPost } from "../lib/api.js";
-import { toolError } from "../lib/format.js";
+import { envelopeSchema, toolError } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import { jobCitationUrl, resolveCanonicalJob, resolveJobRef } from "../lib/jobRef.js";
 import type { Tool } from "../registry.js";
@@ -48,6 +48,17 @@ export const saveJobTool: Tool = {
     "jobs'. Not for tracking an actual application (`track_application`) " +
     "or following companies (`watch_company`).",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        saved: z.boolean().optional().describe("Whether the job is on the saved list after this call"),
+        changed: z.boolean().optional().describe("False when the call was a no-op (already in the requested state; see meta.note)"),
+        title: z.string().optional(),
+        company: z.string().optional(),
+      })
+      .passthrough(),
+    "Result of the save/unsave action",
+  ),
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
   handler: async (args: Args, ctx) => {
     const ref = resolveJobRef(args);

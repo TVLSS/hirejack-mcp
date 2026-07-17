@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { apiGet, siteUrl } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -63,6 +64,61 @@ export const findEmergingSkillsTool: Tool = {
     "established, named skill (`get_skill_history`) or role-level emergence " +
     "(`find_emerging_roles`).",
   inputSchema,
+  outputSchema: envelopeSchema(
+    z
+      .object({
+        skills: z
+          .array(
+            z
+              .object({
+                id: z.string().optional().describe("Skill id — pass to get_skill_history"),
+                name: z.string().optional(),
+                category: z.string().optional().describe("Skill category, e.g. 'language', 'framework', 'ml'"),
+                companyCount: z.number().optional().describe("Companies mentioning it in the latest month"),
+                baseCompanyCount: z.number().optional().describe("Companies at the start of the window"),
+                prevCompanyCount: z.number().optional().describe("Back-compat alias for baseCompanyCount"),
+                companyCountDelta: z.number().optional().describe("Absolute company gain over the window"),
+                growthPct: z.number().optional().describe("Growth over the window, %"),
+                jobMentions: z.number().optional().describe("Job postings mentioning it in the latest month"),
+                trajectory: z
+                  .array(
+                    z
+                      .object({
+                        month: z.string().optional().describe("YYYY-MM"),
+                        companyCount: z.number().optional(),
+                        jobMentions: z.number().optional(),
+                      })
+                      .passthrough(),
+                  )
+                  .optional()
+                  .describe("Per-month climb so the non-decreasing-growth claim is auditable"),
+                window: z
+                  .object({
+                    from: z.string().optional().describe("YYYY-MM"),
+                    to: z.string().optional().describe("YYYY-MM"),
+                  })
+                  .passthrough()
+                  .optional(),
+              })
+              .passthrough(),
+          )
+          .optional()
+          .describe("Emerging skills, largest absolute company gain first"),
+        matched: z.number().optional().describe("Skills that cleared the thresholds (before the limit)"),
+        window: z
+          .object({
+            from: z.string().optional().describe("YYYY-MM"),
+            to: z.string().optional().describe("YYYY-MM"),
+            months: z.number().optional().describe("Monthly snapshots in the window (up to 3)"),
+          })
+          .passthrough()
+          .optional(),
+        filters: z.object({}).passthrough().optional().describe("Echo of the applied thresholds"),
+        note: z.string().optional().describe("Present when there isn't enough snapshot history"),
+      })
+      .passthrough(),
+    "Skills climbing consistently from a low adoption base",
+  ),
   handler: async (args, ctx) => {
     const deps = {
       ctx,

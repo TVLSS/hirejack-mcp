@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { apiGet } from "../lib/api.js";
+import { envelopeSchema } from "../lib/format.js";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import type { Tool } from "../registry.js";
 
@@ -35,6 +36,34 @@ const inputSchema = z.object({
 });
 
 type Args = z.infer<typeof inputSchema>;
+
+const rowSchema = z
+  .object({
+    title: z.string().nullable().optional(),
+    company: z.string().optional(),
+    domain: z.string().optional().describe("Company domain — pairs with jobId for get_job / match_job / save_job / track_application"),
+    jobId: z.string().optional().describe("Canonical job id in the same form the write tools accept"),
+    seniority: z.string().optional().describe("intern|junior|mid|senior|staff|principal|manager|director|vp"),
+    family: z.string().optional().describe("Role family, e.g. 'software_engineering'"),
+    savedAt: z.string().optional().describe("YYYY-MM-DD (list_saved_jobs)"),
+    appliedAt: z.string().optional().describe("YYYY-MM-DD (list_applications)"),
+    stage: z.string().optional().describe("applied|phone_screen|interview|offer|rejected|withdrawn (list_applications)"),
+    listingRemoved: z.boolean().optional().describe("Present (true) when the posting is no longer in the index"),
+    listingExpired: z.boolean().optional().describe("Present (true) when the posting is past its validThrough"),
+  })
+  .passthrough();
+
+const listOutputSchema = (what: string) =>
+  envelopeSchema(
+    z
+      .object({
+        total: z.number().optional().describe("Total entries on the user's list"),
+        returned: z.number().optional().describe("Entries in this response (after limit)"),
+        jobs: z.array(rowSchema).optional().describe("Newest first"),
+      })
+      .passthrough(),
+    what,
+  );
 
 function slimRow(j: SavedRow) {
   return {
@@ -90,6 +119,7 @@ export const listSavedJobsTool: Tool = {
     "review/prune their shortlist. Not for application-pipeline status — " +
     "use `list_applications` for that.",
   inputSchema,
+  outputSchema: listOutputSchema("The user's saved (bookmarked) jobs"),
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: (args: Args, ctx) => listEndpoint("/saved-jobs", "list_saved_jobs", args, ctx),
 };
@@ -104,6 +134,7 @@ export const listApplicationsTool: Tool = {
     "or before moving an application to a new stage. Not for the saved/" +
     "bookmarked list — use `list_saved_jobs` for that.",
   inputSchema,
+  outputSchema: listOutputSchema("The user's tracked applications with pipeline stage"),
   annotations: { readOnlyHint: true, idempotentHint: true },
   handler: (args: Args, ctx) => listEndpoint("/applied", "list_applications", args, ctx),
 };
