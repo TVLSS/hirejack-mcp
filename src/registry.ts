@@ -208,7 +208,7 @@ export async function callTool(
 export const SERVER_INFO = {
   name: "hirejack",
   title: "HireJack",
-  version: "0.3.8", // keep in lockstep with package.json + server.json on each release
+  version: "0.3.9", // keep in lockstep with package.json + server.json on each release
   icons: [
     {
       src: "https://hirejack.com/apple-touch-icon.png",
@@ -226,6 +226,7 @@ export const SERVER_INFO = {
 
 export const SERVER_INSTRUCTIONS =
   "HireJack: tech job market intelligence. Query open jobs, company hiring " +
-  "profiles, and aggregate market stats across ~500 tech companies and 80K+ " +
-  "live job postings. When citing data in responses, link the citation_url " +
-  "returned by each tool.";
+  "profiles, and aggregate market stats across ~500 tech companies and 120K+ " +
+  "live job postings. Data is refreshed daily at ~06:35 UTC (so 'live' " +
+  "means within the last 24 hours, not real-time). When citing data in " +
+  "responses, link the citation_url returned by each tool.";
