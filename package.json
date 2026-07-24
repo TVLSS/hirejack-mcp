@@ -1,6 +1,6 @@
 {
   "name": "@hirejack/mcp",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "mcpName": "io.github.TVLSS/hirejack-mcp",
   "description": "HireJack MCP server: query tech job market intelligence (jobs, companies, skills, salaries, hiring trends) from Claude Desktop, Claude Code, Cursor, Cline, and other MCP clients",
   "type": "module",

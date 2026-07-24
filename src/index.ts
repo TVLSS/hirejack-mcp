@@ -6,6 +6,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ListResourceTemplatesRequestSchema,
+  ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import {
   callTool,
@@ -13,9 +16,15 @@ import {
   SERVER_INFO,
   SERVER_INSTRUCTIONS,
 } from "./registry.js";
+import { listResources, readResource } from "./resources.js";
 
 const server = new Server(SERVER_INFO, {
-  capabilities: { tools: { listChanged: false } },
+  capabilities: {
+    tools: { listChanged: false },
+    // No subscribe: the vocabulary changes on taxonomy releases, not live, so
+    // there is nothing for a client to usefully subscribe to.
+    resources: { listChanged: false, subscribe: false },
+  },
   instructions: SERVER_INSTRUCTIONS,
 });
 
@@ -27,6 +36,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 // error since `userId` is absent from the context.
 server.setRequestHandler(CallToolRequestSchema, async (req) => {
   return callTool(req.params.name, req.params.arguments, { source: "stdio" });
+});
+
+server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+  resources: listResources(),
+}));
+
+// Every resource is a fixed URI — no templates. Answered explicitly (rather
+// than left to fall through as method-not-found) because clients probe this
+// during discovery and an error there reads as a broken server.
+server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
+  resourceTemplates: [],
+}));
+
+server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
+  return readResource(req.params.uri);
 });
 
 const transport = new StdioServerTransport();
