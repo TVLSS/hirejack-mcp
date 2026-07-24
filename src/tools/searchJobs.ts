@@ -136,6 +136,17 @@ const inputSchema = z.object({
       "Years-of-experience bucket the job asks for (AI-extracted yearsMin). " +
         "E.g. '0-2' for entry-level-friendly roles, '10+' for very senior ones.",
     ),
+  sort: z
+    .enum(["newest", "salary"])
+    .optional()
+    .describe(
+      "Result ordering. 'newest' (default) returns the most recently posted " +
+        "first. 'salary' ranks by the TOP of each disclosed USD range, " +
+        "highest first — use it for 'highest paying' / 'best paid' queries. " +
+        "Jobs with no disclosed pay or a non-USD range sink to the end in " +
+        "newest-first order, so combine with has_salary=true for a clean " +
+        "pay ranking.",
+    ),
   limit: z.coerce
     .number()
     .int()
@@ -148,8 +159,8 @@ const inputSchema = z.object({
     .optional()
     .describe(
       "Opaque pagination cursor from a previous search_jobs call's " +
-        "`meta.next_cursor`. Pass it back (with the SAME filters) to fetch " +
-        "the next page of results.",
+        "`meta.next_cursor`. Pass it back with the SAME filters AND the same " +
+        "`sort` to fetch the next page of results.",
     ),
 });
 
@@ -188,9 +199,11 @@ export const searchJobsTool: Tool = {
   description:
     "Search HireJack's database of live tech job postings. Filter by " +
     "keyword, role family, seniority, skill, location, salary, remote " +
-    "policy, or visa sponsorship. Returns a slim list of jobs with title, " +
+    "policy, or visa sponsorship, and sort by newest or highest pay. " +
+    "Returns a slim list of jobs with title, " +
     "company, location, salary range, posted date, and key skills. Use " +
     "this for queries like 'remote senior backend roles paying $200K+', " +
+    "'highest paying Rust jobs' (sort='salary'), " +
     "'data engineer jobs at fintech companies', 'who is hiring Rust " +
     "developers in NYC'. Not for a single known posting (`get_job`), " +
     "company-level questions (`get_company_profile`), personalized ranking " +
@@ -199,7 +212,7 @@ export const searchJobsTool: Tool = {
   outputSchema: envelopeSchema(
     z
       .object({
-        jobs: z.array(jobSlimSchema).describe("Matching jobs, newest first"),
+        jobs: z.array(jobSlimSchema).describe("Matching jobs, ordered by the requested `sort` (newest first by default, highest disclosed pay first when sort='salary')"),
         count: z.number().describe("Jobs in this page (not the corpus total)"),
       })
       .passthrough(),
@@ -223,6 +236,7 @@ export const searchJobsTool: Tool = {
         education: args.education,
         experience: args.experience,
         postedSince: args.posted_since,
+        sort: args.sort,
         cursor: args.cursor,
         limit,
       });
