@@ -6,6 +6,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
   ListResourcesRequestSchema,
   ListResourceTemplatesRequestSchema,
   ReadResourceRequestSchema,
@@ -16,11 +18,13 @@ import {
   SERVER_INFO,
   SERVER_INSTRUCTIONS,
 } from "./registry.js";
+import { listPrompts, getPrompt } from "./prompts.js";
 import { listResources, readResource } from "./resources.js";
 
 const server = new Server(SERVER_INFO, {
   capabilities: {
     tools: { listChanged: false },
+    prompts: { listChanged: false },
     // No subscribe: the vocabulary changes on taxonomy releases, not live, so
     // there is nothing for a client to usefully subscribe to.
     resources: { listChanged: false, subscribe: false },
@@ -36,6 +40,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 // error since `userId` is absent from the context.
 server.setRequestHandler(CallToolRequestSchema, async (req) => {
   return callTool(req.params.name, req.params.arguments, { source: "stdio" });
+});
+
+server.setRequestHandler(ListPromptsRequestSchema, async () => ({
+  prompts: listPrompts(),
+}));
+
+server.setRequestHandler(GetPromptRequestSchema, async (req) => {
+  return getPrompt(req.params.name, (req.params.arguments as Record<string, string>) || {});
 });
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({

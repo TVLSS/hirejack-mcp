@@ -69,6 +69,37 @@ server-side to your subscription.
 - *"Show Nvidia's hiring trajectory over the last 12 months"*
 - *"What skills are climbing consistently from a low base — early signals only"*
 
+## Slash commands (MCP prompts)
+
+Clients that support MCP prompts (Claude Desktop, Cursor) surface these as
+slash commands. All four are built **only** on the tools that work without an
+account, so they never dead-end on an auth error:
+
+| Prompt | Arguments | What it does |
+|--------|-----------|--------------|
+| `find_jobs` | `constraint` (required) | Maps a free-form ask ("remote, $200K+, Rust") onto `search_jobs` filters, loosens one at a time if results are thin, pulls the strongest postings in full. |
+| `company_deep_dive` | `company` (required) | Resolves a name to a domain, pulls the hiring profile, then shows what is open right now. |
+| `market_snapshot` | `focus` (optional) | Aggregate market picture, optionally narrowed to a role, skill or city. |
+| `salary_landscape` | `role_or_skill` (required), `location` (optional) | What a role actually pays, using only postings that disclose a range. |
+
+The hosted endpoint serves a different, personalized set (career check-ins,
+interview prep, match-scored role hunts) because those need an authenticated
+profile.
+
+## Resources
+
+The server exposes HireJack's controlled vocabulary as MCP resources:
+
+| URI | Contents |
+|-----|----------|
+| `hirejack://vocabulary/skills` | Every skill HireJack extracts, with canonical name, id and category |
+| `hirejack://vocabulary/roles` | The role taxonomy: titleId, title, family, IC/management track, typical skills |
+
+Read these before filtering. `search_jobs.skill` substring-matches the
+canonical names, so `Kubernetes` returns jobs while `K8s` returns none — and
+`update_preferences.desired_roles` expects `titleId` values from the roles
+resource.
+
 ## Transports
 
 | Transport | Where | Tools available |
@@ -187,11 +218,13 @@ and not implemented in this repo.
 src/
 ├── index.ts            # stdio entry point
 ├── registry.ts         # transport-agnostic tool registry
+├── prompts.ts          # slash commands (public-tool-only by design)
+├── resources.ts        # controlled vocabulary (skills, roles)
 ├── lib/
 │   ├── api.ts          # HireJack REST client
 │   ├── format.ts       # tool result helpers
 │   └── proAuth.ts      # Pro+ auth check (returns "use hosted endpoint" in stdio)
-└── tools/              # 25 tool implementations
+└── tools/              # 29 files, 31 registered tools
 ```
 
 ## License
