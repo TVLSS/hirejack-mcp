@@ -1,4 +1,3 @@
-import { TIER } from "../lib/tiers.js";
 import { z } from "zod";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import { envelopeSchema, toolError } from "../lib/format.js";
@@ -44,7 +43,7 @@ const matchSkillSchema = z
 export const matchJobTool: Tool = {
   name: "match_job",
   description:
-    "Score how well the authenticated user matches a specific job. " + TIER.PRO + " " +
+    "Score how well the authenticated user matches a specific job. " + "Pro tier." + " " +
     "Returns matchPct (0-100, the same score the website shows for this " +
     "job), requirementsPct (how much of this posting's own requirement " +
     "list the user meets), a dimension breakdown (skills, role, " +
