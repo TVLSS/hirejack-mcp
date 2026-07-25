@@ -1,3 +1,4 @@
+import { TIER } from "../lib/tiers.js";
 import { z } from "zod";
 import { handleApiError, proResult, requireUser } from "../lib/proAuth.js";
 import { envelopeSchema, toolError } from "../lib/format.js";
@@ -43,10 +44,13 @@ const matchSkillSchema = z
 export const matchJobTool: Tool = {
   name: "match_job",
   description:
-    "Score how well the authenticated user matches a specific job. " + "Pro tier." + " " +
-    "Returns matchPct (0-100), a dimension breakdown (skills, role, " +
+    "Score how well the authenticated user matches a specific job. " + TIER.PRO + " " +
+    "Returns matchPct (0-100, the same score the website shows for this " +
+    "job), requirementsPct (how much of this posting's own requirement " +
+    "list the user meets), a dimension breakdown (skills, role, " +
     "seniority, location, remote — plus experience when both the user's " +
-    "resume-derived years and the job's required years are known), " +
+    "resume-derived years and the job's required years are known, and " +
+    "semantic when both the user's profile and the job carry embeddings), " +
     "matched/missing/bonus skill lists, an experienceFit comparison, " +
     "ATS-specific resume tips for the company's ATS, and a priorityScore " +
     "that factors hiring velocity. Use for queries like 'how well do I " +
@@ -56,7 +60,8 @@ export const matchJobTool: Tool = {
   outputSchema: envelopeSchema(
     z
       .object({
-        matchPct: z.number().optional().describe("Overall weighted match, 0-100"),
+        matchPct: z.number().optional().describe("The canonical match score, 0-100 — the SAME number HireJack shows on the job page, in the For You list and in its match emails, so quote this one. Profile-vs-job fit: matched skills, desired role, family, location, remote preference, seniority, experience and embedding similarity, over the best score that profile could achieve"),
+        requirementsPct: z.number().optional().describe("A different question: what % of THIS posting's listed requirements the user meets, weighting the role's must-have skills 2x. High when the user covers a short requirements list; not comparable across jobs. `breakdown` audits this number, not matchPct"),
         skillMatchPct: z.number().optional().describe("Skills dimension alone, 0-100"),
         matchedSkills: z.array(matchSkillSchema).optional(),
         missingSkills: z.array(matchSkillSchema).optional(),
@@ -65,7 +70,7 @@ export const matchJobTool: Tool = {
         locationMatch: z.boolean().optional(),
         remoteMatch: z.boolean().optional(),
         roleMatch: z.boolean().optional().describe("True on a desired-role match OR a same-family match"),
-        priorityScore: z.number().optional().describe("0-100; 70% overall match + 30% company hiring velocity"),
+        priorityScore: z.number().optional().describe("0-100; 70% of matchPct (the canonical score) + 30% of the company's hiring velocity"),
         atsTips: z.array(z.string()).optional().describe("Actionable resume tips, including ATS-platform-specific ones"),
         atsType: z.string().optional().describe("Detected ATS platform (e.g. 'greenhouse', 'workday') or 'unknown'"),
         salaryContext: z
@@ -88,6 +93,14 @@ export const matchJobTool: Tool = {
           .passthrough()
           .optional()
           .describe("Present only when both the user's resume-derived years and the job's required years are known"),
+        semanticFit: z
+          .object({
+            cosine: z.number().optional().describe("Raw cosine similarity between profile and job embeddings"),
+            credit: z.number().optional().describe("Cosine mapped through the 0.25 noise floor / 0.75 saturation curve, 0-100"),
+          })
+          .passthrough()
+          .optional()
+          .describe("Present only when both the user's profileEmb and the job's emb exist"),
         breakdown: z
           .object({
             skills: z.number().optional(),
@@ -96,6 +109,7 @@ export const matchJobTool: Tool = {
             location: z.number().optional(),
             remote: z.number().optional(),
             experience: z.number().optional().describe("Present only when the experience dimension is scored"),
+            semantic: z.number().optional().describe("Embedding similarity between the user's profile and the full job description, 0-100. Present only when both the user's profileEmb and the job's emb exist; weighted 20% when scored"),
           })
           .passthrough()
           .optional()
