@@ -1,0 +1,93 @@
+name: Build
+
+# Guards the two ways this repo actually gets built:
+#   - npm ci      — what release.yml runs before `npm publish`
+#   - pnpm install — what Glama's introspection builder runs (it ignores our
+#     Dockerfile and synthesizes its own spec: debian:trixie-slim + node 24 +
+#     pnpm 10.14.0 + mcp-proxy, then `pnpm install && pnpm run build`)
+#
+# Both lockfiles are committed, so both are checked frozen. Bump a dependency
+# and you must regenerate BOTH (`npm install` and `pnpm install --lockfile-only`)
+# or this fails — which is the point: a drifted pnpm-lock silently breaks
+# Glama's build, and we would only find out from a failed listing.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  npm:
+    name: npm ci + build (release path)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+
+  pnpm:
+    name: pnpm + build + stdio smoke (Glama path)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: npm install -g pnpm@10.14.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+      # What mcp-proxy does to the built server. Catches a build that compiles
+      # but can't complete a handshake, and anything polluting stdout (stdout is
+      # the JSON-RPC channel — a stray console.log there breaks every client).
+      - name: stdio handshake
+        env:
+          HIREJACK_API_BASE: https://hirejack.com/api
+          HIREJACK_SITE_BASE: https://hirejack.com
+        run: |
+          node --input-type=module -e '
+            import { spawn } from "node:child_process";
+            const child = spawn("node", ["dist/index.js"], { stdio: ["pipe", "pipe", "inherit"] });
+            const timer = setTimeout(() => { child.kill(); fail("timed out waiting for responses"); }, 30000);
+            const fail = (msg) => { console.error("FAIL: " + msg); process.exit(1); };
+
+            const send = (m) => child.stdin.write(JSON.stringify(m) + "\n");
+            send({ jsonrpc: "2.0", id: 1, method: "initialize", params: {
+              protocolVersion: "2025-06-18", capabilities: {},
+              clientInfo: { name: "ci-smoke", version: "1" } } });
+            send({ jsonrpc: "2.0", method: "notifications/initialized" });
+            send({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
+
+            let buf = "", sawInit = false;
+            child.stdout.on("data", (chunk) => {
+              buf += chunk;
+              let i;
+              while ((i = buf.indexOf("\n")) !== -1) {
+                const line = buf.slice(0, i).trim();
+                buf = buf.slice(i + 1);
+                if (!line) continue;
+                let msg;
+                try { msg = JSON.parse(line); }
+                catch { fail("non-JSON on stdout: " + line.slice(0, 200)); }
+                if (msg.error) fail("JSON-RPC error: " + JSON.stringify(msg.error));
+                if (msg.id === 1) {
+                  sawInit = true;
+                  console.log("initialize OK:", msg.result.serverInfo.name, msg.result.serverInfo.version,
+                              "caps:", Object.keys(msg.result.capabilities).join(","));
+                }
+                if (msg.id === 2) {
+                  if (!sawInit) fail("tools/list answered before initialize");
+                  const n = msg.result.tools.length;
+                  if (n < 1) fail("tools/list returned no tools");
+                  console.log("tools/list OK: " + n + " tools");
+                  clearTimeout(timer);
+                  child.kill();
+                  process.exit(0);
+                }
+              }
+            });
+            child.on("exit", (code) => fail("server exited early with code " + code));
+          '
